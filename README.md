@@ -11,3 +11,4 @@ Project creation Lifeline:
    -- make the form
    -- make the password visibility function
 5. Page Animation
+6. Server Setup + User Auth Form Routes
