@@ -10,3 +10,4 @@ Project creation Lifeline:
 4. Working on User Auth Form Page
    -- make the form
    -- make the password visibility function
+5. Page Animation
