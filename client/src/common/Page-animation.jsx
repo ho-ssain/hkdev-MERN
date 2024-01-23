@@ -1,7 +1,8 @@
 /* eslint-disable react/prop-types */
+
 import { AnimatePresence, motion } from "framer-motion";
 
-const PageAnimation = ({
+const AnimationWrapper = ({
   children,
   keyValue,
   className,
@@ -24,4 +25,4 @@ const PageAnimation = ({
   );
 };
 
-export default PageAnimation;
+export default AnimationWrapper;

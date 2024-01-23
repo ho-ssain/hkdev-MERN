@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 .env
+
+hkdev-firebase.json
+request.rest

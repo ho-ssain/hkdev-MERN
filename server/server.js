@@ -1,40 +1,54 @@
-import express from "express";
+import express, { json } from "express";
 import mongoose from "mongoose";
 import "dotenv/config";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import cors from "cors";
 import { nanoid } from "nanoid";
+import cors from "cors";
+import admin from "firebase-admin";
+import serviceAccountKey from "./hkdev-ea2eb-firebase-adminsdk-kmzwr-f1baba000d.json" assert { type: "json" };
 
-// Schema
-import User from "./schemas/User.js";
+import { getAuth } from "firebase-admin/auth";
 
-// set up the server
+//Schema's................
+import User from "./Schema/User.js";
+
+//
+//
+//
 const server = express();
+let PORT = 3000;
 
-// middle wares
-server.use(express.json);
-server.use(cors());
-
-// set up the database
-mongoose.connect(process.env.DB_LOCATION, {
-  autoIndex: true,
+//
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccountKey),
 });
 
-// >--- API Routes S--->
-
-// >---- User Auth Routes Starts---->
 // regex for email, password
 let emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
 
+//
+//
+//middle wares
+server.use(express.json());
+server.use(cors());
+//
+//
+// connecting to database.
+mongoose.connect(process.env.DB_LOCATION, { autoIndex: true });
+
+// Making API for listening roots/urls
+//
+// sign-up root.........
+
 const generatedUsername = async (email) => {
   let username = email.split("@")[0];
-  let isUsernameExist = await User.exists({
+  let isUsernameNotUnique = await User.exists({
     "personal_info.username": username,
   }).then((result) => result);
 
-  if (isUsernameExist) {
+  if (isUsernameNotUnique) {
     username += nanoid().substring(0, 5);
   }
   return username;
@@ -51,6 +65,7 @@ const formatDataToSend = (user) => {
   };
 };
 
+//
 server.post("/signup", (req, res) => {
   let { fullname, email, password } = req.body;
 
@@ -72,8 +87,6 @@ server.post("/signup", (req, res) => {
         "Password should be 6 to 20 characters long with a numeric, 1 lowercase and 1 uppercase letters!",
     });
   }
-
-  // hashing the password
   bcrypt.hash(password, 10, async (err, hashed_password) => {
     let username = await generatedUsername(email);
     let user = new User({
@@ -96,8 +109,12 @@ server.post("/signup", (req, res) => {
         return res.status(500).json({ error: err.message });
       });
   });
+
+  // return res.status(200).json({ status: "Okay" });
 });
 
+// sign-in root.........
+//
 server.post("/signin", (req, res) => {
   let { email, password } = req.body;
 
@@ -119,18 +136,84 @@ server.post("/signin", (req, res) => {
           return res.status(200).json(formatDataToSend(user));
         }
       });
+
+      // return res.json({ status: "🙂Got user document!" });
     })
     .catch((err) => {
       console.log(err.message);
       return res.status(500).json({ error: err.message });
     });
 });
-// <---- User Auth Routes Ends----<
 
-// <--- API Routes E---<
+// sign-in with google-auth
+//
+server.post("/google-auth", async (req, res) => {
+  let { accessToken } = req.body;
+  getAuth()
+    .verifyIdToken(accessToken)
+    .then(async (decodedUser) => {
+      let { email, name, picture } = decodedUser;
+      picture = picture.replace("s96-c", "s384-c");
 
-// listening to the port
-let PORT = 3000;
+      let user = await User.findOne({ "personal_info.email": email })
+        .select(
+          "personal_info.fullname personal_info.username personal_info.profile_img personal_info.google_auth"
+        )
+        .then((u) => {
+          return u || null;
+        })
+        .catch((err) => res.status(500).json({ error: err.message }));
+
+      if (user) {
+        // login
+        if (!user.google_auth) {
+          return res.status(403).json({
+            error:
+              "This email was signed up without google. Please log-in with password to access the account!",
+          });
+        }
+      } else {
+        // sign-up
+        let username = await generatedUsername(email);
+        user = new User({
+          personal_info: {
+            fullname: name,
+            email: email,
+            profile_img: picture,
+            username,
+          },
+          google_auth: true,
+        });
+
+        await user
+          .save()
+          .then((u) => {
+            user = u;
+          })
+          .catch((err) => res.status(500).json({ error: err.message }));
+      }
+
+      return res.status(200).json(formatDataToSend(user));
+    })
+    .catch((err) =>
+      res.status(500).json({
+        error:
+          "Failed to authenticate you with google. Try with some other google account.",
+      })
+    );
+});
+
+//
+//
+//
+//
+//
+//.................
+//.................
+//
+//
+
+// listening on the port.
 server.listen(PORT, () => {
-  console.log(`Listening to port -> ${PORT}`);
+  console.log(`Listening on the port-> ${PORT}`);
 });

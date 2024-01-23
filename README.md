@@ -13,3 +13,7 @@ Project creation Lifeline:
 4. Page Animation
 5. Server Setup + User Auth Form Routes
 6. Connecting Form UI to server
+7. Store user in Sessions
+8. User Navigation + SIgn Out
+9. Google Authentication
+10.

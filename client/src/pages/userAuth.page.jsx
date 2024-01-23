@@ -1,23 +1,24 @@
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable react/prop-types */
-
-import Input from "../components/input/input.component";
-import google from "../assets/sm-icon/google.png";
-import { Link } from "react-router-dom";
-import PageAnimation from "../common/page.animation";
-import { useContext, useRef } from "react";
+/* eslint-disable no-unused-vars */
+import PropTypes from "prop-types";
+import Input from "../components/input";
+import googleIcon from "../assets/google.png";
+import { Link, Navigate } from "react-router-dom";
+import AnimationWrapper from "../common/page-animation";
 import { Toaster, toast } from "react-hot-toast";
 import axios from "axios";
 import { storeInSession } from "../common/Session";
+import { useContext, useRef } from "react";
+import { UserContext } from "../App";
+import { authWithGoogle } from "../common/Firebase";
 
 const UserAuthForm = ({ type }) => {
-  // using ref hook for accessing the form element.
   const authForm = useRef();
 
   let { userAuth: { accessToken } = { accessToken: null }, setUserAuth } =
     useContext(UserContext);
 
-  // user authentication through server
+  console.log(accessToken);
+
   const userAuthThroughServer = (serverRoute, formData) => {
     axios
       .post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute, formData)
@@ -30,21 +31,20 @@ const UserAuthForm = ({ type }) => {
       });
   };
 
-  // handling the SIgn-in/Sign-Up button
   const handleSubmit = (e) => {
     e.preventDefault();
+
     let serverRoute = type === "sign-in" ? "/signin" : "/signup";
 
-    // regex for email
-    let emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+    let emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/; // regex for email
+    let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
 
-    // regex for password
-    let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
+    // formData
 
-    // retrieve the form-data
     let form = new FormData(authForm.current);
     let formData = {};
-    for (let [key, value] of form.entries()) {
+
+    for (const [key, value] of form.entries()) {
       formData[key] = value;
     }
 
@@ -70,24 +70,46 @@ const UserAuthForm = ({ type }) => {
         "Password should be 6 to 20 characters long with a numeric, 1 lowercase and 1 uppercase letters!"
       );
     }
+
     userAuthThroughServer(serverRoute, formData);
   };
 
-  return (
-    <PageAnimation keyValue={type}>
+  const handleGoogleAuth = (e) => {
+    e.preventDefault();
+
+    authWithGoogle()
+      .then((user) => {
+        // console.log(user);
+
+        let serverRoute = "/google-auth";
+        let formData = {
+          accessToken: user.accessToken,
+        };
+        userAuthThroughServer(serverRoute, formData);
+      })
+      .catch((err) => {
+        toast.error("trouble login through google! 😓");
+        return console.log(err);
+      });
+  };
+
+  return accessToken ? (
+    <Navigate to="/" />
+  ) : (
+    <AnimationWrapper keyValue={type}>
       <section className="h-cover flex items-center justify-center">
         <Toaster />
         <form ref={authForm} className="w-[80%] max-w-[400px]">
           <h1 className="text-3xl font-gelasio capitalize text-center mb-24">
-            {type === "sign-in" ? "Welcome Back!🙂" : "Join Us Today!"}
+            {type === "sign-in" ? "Welcome Back!" : "Join hkDev"}
           </h1>
 
           {type !== "sign-in" ? (
             <Input
               name="fullname"
               type="text"
-              placeholder="Full name"
-              icon="fi-rr-user"
+              placeholder="Full-name"
+              icon="fi-ss-user-pen"
             />
           ) : (
             ""
@@ -97,14 +119,14 @@ const UserAuthForm = ({ type }) => {
             name="email"
             type="email"
             placeholder="Email"
-            icon="fi-rr-envelope"
+            icon="fi-sr-envelope"
           />
 
           <Input
             name="password"
             type="password"
             placeholder="Password"
-            icon="fi-rr-key"
+            icon="fi-sr-lock"
           />
 
           <button
@@ -115,39 +137,43 @@ const UserAuthForm = ({ type }) => {
             {type.replace("-", " ")}
           </button>
 
-          {/* ------------------------------------------  */}
-
           <div className="relative w-full flex items-center gap-2 my-10 opacity-10 uppercase text-black font-bold">
             <hr className="w-1/2 border-black" />
             <p>or</p>
             <hr className="w-1/2 border-black" />
           </div>
 
-          {/* google icon  */}
-          <button className="btn-dark flex items-center justify-center gap-4 w-[90%] center">
-            <img src={google} alt="google" className="w-5" /> continue with
-            google
+          <button
+            className="btn-dark flex items-center justify-center gap-4 w-[90%] center"
+            onClick={handleGoogleAuth}
+          >
+            <img src={googleIcon} alt="google" className="w-5" /> Continue With
+            Google
           </button>
 
           {type === "sign-in" ? (
             <p className="mt-6 text-dark-grey text-xl text-center">
-              Don't have an account ?
+              Don&apos;t have an account ?
               <Link to="/signup" className="underline text-black text-xl ml-1">
-                Join us today
+                Join Us.
               </Link>
             </p>
           ) : (
             <p className="mt-6 text-dark-grey text-xl text-center">
               Already a member ?
               <Link to="/signin" className="underline text-black text-xl ml-1">
-                Sign in here
+                Sign in here.
               </Link>
             </p>
           )}
         </form>
       </section>
-    </PageAnimation>
+    </AnimationWrapper>
   );
+};
+
+UserAuthForm.propTypes = {
+  type: PropTypes.string.isRequired,
 };
 
 export default UserAuthForm;
