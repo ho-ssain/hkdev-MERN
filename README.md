@@ -18,3 +18,4 @@ Project creation Lifeline:
 9. Google Authentication
 10. Setting up "/editor" route
 11. make the Editor Page component
+12. Blog Editor-Navbar
