@@ -1,6 +1,8 @@
 #
 
-Project creation Lifeline:
+## --
+
+### Project creation Lifeline
 
 0. Setting up the project
    cmd--:
@@ -19,3 +21,4 @@ Project creation Lifeline:
 10. Setting up "/editor" route
 11. make the Editor Page component
 12. Blog Editor-Navbar
+13. Blog Editor-Banner
