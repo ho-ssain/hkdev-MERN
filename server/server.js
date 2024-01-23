@@ -14,6 +14,7 @@ const server = express();
 
 // middle wares
 server.use(express.json);
+server.use(cors());
 
 // set up the database
 mongoose.connect(process.env.DB_LOCATION, {

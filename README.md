@@ -2,13 +2,14 @@
 
 Project creation Lifeline:
 
-1. Setting up the project
+0. Setting up the project
    cmd--:
    - npx tailwindcss init -p
-2. create the Navbar
-3. Setting up Routes
-4. Working on User Auth Form Page
+1. create the Navbar
+2. Setting up Routes
+3. Working on User Auth Form Page
    -- make the form
    -- make the password visibility function
-5. Page Animation
-6. Server Setup + User Auth Form Routes
+4. Page Animation
+5. Server Setup + User Auth Form Routes
+6. Connecting Form UI to server
