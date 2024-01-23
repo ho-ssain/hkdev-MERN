@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 import PropTypes from "prop-types";
 import Input from "../components/input";
@@ -12,12 +13,12 @@ import { UserContext } from "../App";
 import { authWithGoogle } from "../common/Firebase";
 
 const UserAuthForm = ({ type }) => {
-  const authForm = useRef();
+  // const authForm = useRef();
 
   let { userAuth: { accessToken } = { accessToken: null }, setUserAuth } =
     useContext(UserContext);
 
-  console.log(accessToken);
+  // console.log(accessToken);
 
   const userAuthThroughServer = (serverRoute, formData) => {
     axios
@@ -41,7 +42,7 @@ const UserAuthForm = ({ type }) => {
 
     // formData
 
-    let form = new FormData(authForm.current);
+    let form = new FormData(authForm);
     let formData = {};
 
     for (const [key, value] of form.entries()) {
@@ -99,7 +100,7 @@ const UserAuthForm = ({ type }) => {
     <AnimationWrapper keyValue={type}>
       <section className="h-cover flex items-center justify-center">
         <Toaster />
-        <form ref={authForm} className="w-[80%] max-w-[400px]">
+        <form id="authForm" className="w-[80%] max-w-[400px]">
           <h1 className="text-3xl font-gelasio capitalize text-center mb-24">
             {type === "sign-in" ? "Welcome Back!" : "Join hkDev"}
           </h1>
