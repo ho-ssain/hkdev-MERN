@@ -16,4 +16,5 @@ Project creation Lifeline:
 7. Store user in Sessions
 8. User Navigation + SIgn Out
 9. Google Authentication
-10.
+10. Setting up "/editor" route
+11. make the Editor Page component

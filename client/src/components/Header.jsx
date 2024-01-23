@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useContext, useState } from "react";
-import logo from "../assets/logo.png";
+import logo from "../assets/logo-1.png";
 import { Link, Outlet } from "react-router-dom";
 import { UserContext } from "../App";
 import UserNavigationPanel from "./UserNavigationPanel ";
