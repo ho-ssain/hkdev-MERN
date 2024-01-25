@@ -25,3 +25,4 @@
 14. Upload image to Cloudinary
 15. Connecting server to Cloudinary
 16. Blog Title Texture
+17. Editor Context
