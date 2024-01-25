@@ -256,7 +256,7 @@ server.post("/bannerUpload", (req, res) => {
       },
       (err, res) => {
         if (res && res.secure_url) {
-          console.log(res.secure_url);
+          // console.log(res.secure_url);
           return resolve(res.secure_url);
         }
         console.log(err.message);

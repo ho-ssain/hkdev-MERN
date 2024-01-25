@@ -23,3 +23,5 @@
 12. Blog Editor-Navbar
 13. Blog Editor-Banner
 14. Upload image to Cloudinary
+15. Connecting server to Cloudinary
+16. Blog Title Texture
