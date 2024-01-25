@@ -1,12 +1,39 @@
+/* eslint-disable no-unused-vars */
 import { Link } from "react-router-dom";
 import logo from "../assets/logo-2.png";
 import AnimationWrapper from "../common/page-animation";
 import defaultBanner from "../assets/blog banner.png";
+import loader from "../assets/loading.gif";
+import { useRef, useState } from "react";
+import axios from "axios";
 
 const BlogEditor = () => {
+  const [file, setFile] = useState("");
+  const [loading, setLoading] = useState(false);
+
   function handleBannerUpload(e) {
-    let img = e.target.files[0];
-    console.log(img);
+    e.preventDefault();
+    const bannerFile = e.target.files[0];
+    const reader = new FileReader();
+    reader.readAsDataURL(bannerFile);
+    reader.onloadend = () => {
+      uploadImage(reader.result);
+    };
+  }
+
+  async function uploadImage(base64EncodedImage) {
+    // console.log(base64EncodedImage);
+    setLoading(true);
+    await axios
+      .post(import.meta.env.VITE_SERVER_DOMAIN + "/bannerUpload", {
+        data: base64EncodedImage,
+      })
+      .then((res) => {
+        setFile(res.data);
+        console.log("👉 " + res.data);
+      })
+      .then(() => setLoading(false))
+      .catch((err) => console.error(err));
   }
 
   return (
@@ -31,7 +58,16 @@ const BlogEditor = () => {
           <div className="mx-auto max-w-[900px] w-full">
             <div className="relative aspect-video hover:opacity-80 bg-white border-4 border-grey">
               <label htmlFor="uploadBanner">
-                <img src={defaultBanner} alt="" className="z-20" />
+                {loading ? (
+                  <img src={loader} alt="loader" />
+                ) : (
+                  <img
+                    src={file || defaultBanner}
+                    alt="banner"
+                    className="z-20"
+                  />
+                )}
+
                 <input
                   id="uploadBanner"
                   type="file"

@@ -5,19 +5,35 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { nanoid } from "nanoid";
 import cors from "cors";
+import multer from "multer";
+import path, { resolve } from "path";
 import admin from "firebase-admin";
+import fileUpload from "express-fileupload";
 import serviceAccountKey from "./hkdev-ea2eb-firebase-adminsdk-kmzwr-f1baba000d.json" assert { type: "json" };
 
 import { getAuth } from "firebase-admin/auth";
-
+import cloudinary from "./utils/cloudinary.js";
 //Schema's................
 import User from "./Schema/User.js";
 
 //
 //
-//
+// 🖥️
 const server = express();
 let PORT = 3000;
+
+//
+//
+//middle wares
+server.use(cors());
+server.use(express.json({ limit: "50mb" }));
+server.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+//
+//
+//
+//
+//
 
 //
 admin.initializeApp({
@@ -28,11 +44,26 @@ admin.initializeApp({
 let emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
 
-//
-//
-//middle wares
-server.use(express.json());
-server.use(cors());
+/* 
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/imgs");
+  },
+  filename: (req, file, cb) => {
+    cb(
+      null,
+      file.fieldname + "_" + Date.now() + path.extname(file.originalname)
+    );
+  },
+});
+
+
+const upload = multer({
+  storage: storage,
+});
+
+ */
+
 //
 //
 // connecting to database.
@@ -40,7 +71,7 @@ mongoose.connect(process.env.DB_LOCATION, { autoIndex: true });
 
 // Making API for listening roots/urls
 //
-// sign-up root.........
+//
 
 const generatedUsername = async (email) => {
   let username = email.split("@")[0];
@@ -65,7 +96,10 @@ const formatDataToSend = (user) => {
   };
 };
 
-//
+//..................
+// sign-up root 👇
+//..................
+
 server.post("/signup", (req, res) => {
   let { fullname, email, password } = req.body;
 
@@ -113,8 +147,10 @@ server.post("/signup", (req, res) => {
   // return res.status(200).json({ status: "Okay" });
 });
 
-// sign-in root.........
-//
+//..................
+// sign-in route 👇
+//..................
+
 server.post("/signin", (req, res) => {
   let { email, password } = req.body;
 
@@ -145,8 +181,10 @@ server.post("/signin", (req, res) => {
     });
 });
 
-// sign-in with google-auth
-//
+//............................
+// sign-in with google-auth 👇
+//............................
+
 server.post("/google-auth", async (req, res) => {
   let { accessToken } = req.body;
   getAuth()
@@ -203,17 +241,44 @@ server.post("/google-auth", async (req, res) => {
     );
 });
 
+//..................
+//  upload Banner image route 👇
+//..................
+
+server.post("/bannerUpload", (req, res) => {
+  const fileStr = req.body.data;
+  // console.log(fileStr);
+  new Promise((resolve, reject) => {
+    cloudinary.uploader.upload(
+      fileStr,
+      {
+        upload_preset: "hk_dev",
+      },
+      (err, res) => {
+        if (res && res.secure_url) {
+          console.log(res.secure_url);
+          return resolve(res.secure_url);
+        }
+        console.log(err.message);
+        return reject({ message: err.message });
+      }
+    );
+  })
+    .then((url) => res.send(url))
+    .catch((err) => res.status(500).send(err));
+});
+
+//..................
+//  Display Banner image route 👇
+//..................
+
 //
-//
-//
-//
-//
-//.................
-//.................
+//....................................
+// listening on the port 👇
+//....................................
 //
 //
 
-// listening on the port.
 server.listen(PORT, () => {
   console.log(`Listening on the port-> ${PORT}`);
 });

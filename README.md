@@ -22,3 +22,4 @@
 11. make the Editor Page component
 12. Blog Editor-Navbar
 13. Blog Editor-Banner
+14. Upload image to Cloudinary
