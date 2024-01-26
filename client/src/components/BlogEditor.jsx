@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import { Link } from "react-router-dom";
 import logo from "../assets/logo-2.png";
@@ -17,19 +18,24 @@ const BlogEditor = () => {
 
   let {
     blog,
-    blog: { title, banner, concent, tags, des },
+    blog: { title, banner, content, tags, des },
     setBlog,
+    textEditor,
+    setTextEditor,
+    setEditorState,
   } = useContext(EditorContext);
 
   // useEffect
 
   useEffect(() => {
-    let editor = new EditorJS({
-      holder: "textEditor",
-      data: "",
-      tools: Tools,
-      placeholder: "Write here...",
-    });
+    setTextEditor(
+      new EditorJS({
+        holder: "textEditor",
+        data: "",
+        tools: Tools,
+        placeholder: "Write here...",
+      })
+    );
   }, []);
 
   function handleBannerUpload(e) {
@@ -87,6 +93,30 @@ const BlogEditor = () => {
     img.src = defaultBanner;
   };
 
+  const handlePublishEvent = (e) => {
+    if (!banner.length) {
+      return toast.error("Upload a blog banner to publish it.");
+    }
+    if (!title.length) {
+      return toast.error("Write blog title to publish it.");
+    }
+    if (textEditor.isReady) {
+      textEditor
+        .save()
+        .then((data) => {
+          if (data.blocks.length) {
+            setBlog({ ...blog, content: data });
+            setEditorState("publish");
+          } else {
+            return toast.error("Write something in your blog to publish it.");
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  };
+
   return (
     <>
       <nav className="navbar">
@@ -101,7 +131,9 @@ const BlogEditor = () => {
         </p>
 
         <div className="flex gap-4 ml-auto">
-          <button className="btn-dark py-2">Publish</button>
+          <button className="btn-dark py-2" onClick={handlePublishEvent}>
+            Publish
+          </button>
           <button className="btn-light py-2">Save Draft</button>
         </div>
       </nav>

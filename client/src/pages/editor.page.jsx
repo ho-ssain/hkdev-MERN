@@ -8,7 +8,7 @@ import PublishForm from "../components/PublishForm";
 const blogStructure = {
   title: "",
   banner: "",
-  concent: [],
+  content: [],
   tags: [],
   des: "",
   author: { personal_info: {} },
@@ -19,13 +19,21 @@ export const EditorContext = createContext({});
 const Editor = () => {
   const [blog, setBlog] = useState(blogStructure);
   const [editorState, setEditorState] = useState("editor");
+  const [textEditor, setTextEditor] = useState({ isReady: false });
 
   let { userAuth: { accessToken } = { accessToken: null } } =
     useContext(UserContext);
 
   return (
     <EditorContext.Provider
-      value={{ blog, setBlog, editorState, setEditorState }}
+      value={{
+        blog,
+        setBlog,
+        editorState,
+        setEditorState,
+        textEditor,
+        setTextEditor,
+      }}
     >
       {accessToken === "null" ? (
         <Navigate to="/signin" />

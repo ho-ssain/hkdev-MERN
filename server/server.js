@@ -9,7 +9,7 @@ import multer from "multer";
 import path, { resolve } from "path";
 import admin from "firebase-admin";
 import fileUpload from "express-fileupload";
-import serviceAccountKey from "./hkdev-ea2eb-firebase-adminsdk-kmzwr-f1baba000d.json" assert { type: "json" };
+// import serviceAccountKey from "./hkdev-ea2eb-firebase-adminsdk-kmzwr-f1baba000d.json" assert { type: "json" };
 
 import { getAuth } from "firebase-admin/auth";
 import cloudinary from "./utils/cloudinary.js";
@@ -36,9 +36,9 @@ server.use(express.urlencoded({ limit: "50mb", extended: true }));
 //
 
 //
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccountKey),
-});
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccountKey),
+// });
 
 // regex for email, password
 let emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;

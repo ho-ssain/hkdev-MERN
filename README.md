@@ -27,3 +27,4 @@
 16. Blog Title Texture
 17. Editor Context
 18. Blog Editor
+19. Text Editor Context and Changing Editor State
