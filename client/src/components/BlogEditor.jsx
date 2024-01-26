@@ -4,10 +4,12 @@ import logo from "../assets/logo-2.png";
 import AnimationWrapper from "../common/page-animation";
 import defaultBanner from "../assets/blog banner.png";
 import loader from "../assets/loading.gif";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { Toaster, toast } from "react-hot-toast";
 import { EditorContext } from "../pages/editor.page";
+import EditorJS from "@editorjs/editorjs";
+import { Tools } from "./tools";
 
 const BlogEditor = () => {
   // const [file, setFile] = useState("");
@@ -19,9 +21,16 @@ const BlogEditor = () => {
     setBlog,
   } = useContext(EditorContext);
 
-  // console.log(blog);
+  // useEffect
 
-  // useEffect to retrieve the image URL from the local storage on component mount
+  useEffect(() => {
+    let editor = new EditorJS({
+      holder: "textEditor",
+      data: "",
+      tools: Tools,
+      placeholder: "Write here...",
+    });
+  }, []);
 
   function handleBannerUpload(e) {
     e.preventDefault();
@@ -131,8 +140,9 @@ const BlogEditor = () => {
               onKeyDown={handleTitleKeyDown}
               onChange={handleTitleChange}
             ></textarea>
-            {/*------- Editor -------------*/}
             <hr className="w-full opacity-10 my-5" />
+            {/*------- Editor -------------*/}
+            <div id="textEditor" className="font-gelasio"></div>
           </div>
         </section>
       </AnimationWrapper>
