@@ -33,3 +33,4 @@
 22. Publishing the Blog
 23. Saving Blog Draft
 24. Setting up Home Route in app.jsx
+25. Home Page
