@@ -30,3 +30,4 @@
 19. Text Editor Context and Changing Editor State
 20. Publish Form
 21. Create-blog Route
+22. Publishing the Blog
