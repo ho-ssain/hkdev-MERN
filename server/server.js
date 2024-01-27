@@ -293,32 +293,34 @@ server.post("/create-blog", verifyJWT, (req, res) => {
   let { title, des, banner, tags, content, draft } = req.body;
   if (!title.length) {
     return res.status(403).json({
-      error: "you must provide a title to publish the blog",
+      error: "you must provide a title",
     });
   }
 
-  if (!des.length || des.length > 200) {
-    return res.status(403).json({
-      error: "you must provide blog description under 200 characters",
-    });
-  }
+  if (!draft) {
+    if (!des.length || des.length > 200) {
+      return res.status(403).json({
+        error: "you must provide blog description under 200 characters",
+      });
+    }
 
-  if (!banner.length) {
-    return res
-      .status(403)
-      .json({ error: "you must provide blog banner to publish it" });
-  }
+    if (!banner.length) {
+      return res
+        .status(403)
+        .json({ error: "you must provide blog banner to publish it" });
+    }
 
-  if (!content.blocks.length) {
-    return res
-      .status(403)
-      .json({ error: "There must be some blog content to publish it" });
-  }
+    if (!content.blocks.length) {
+      return res
+        .status(403)
+        .json({ error: "There must be some blog content to publish it" });
+    }
 
-  if (!tags.length || tags.length > 10) {
-    return res
-      .status(403)
-      .json({ error: "Provide tags in order to publish the blog, Maximum 10" });
+    if (!tags.length || tags.length > 10) {
+      return res.status(403).json({
+        error: "Provide tags in order to publish the blog, Maximum 10",
+      });
+    }
   }
 
   tags = tags.map((tag) => tag.toLowerCase());
