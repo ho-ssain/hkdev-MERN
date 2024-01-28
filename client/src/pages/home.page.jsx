@@ -4,6 +4,7 @@ import AnimationWrapper from "../common/page-animation";
 import InPageNavigation from "../components/InPageNavigation";
 import axios from "axios";
 import Loader from "../components/Loader";
+import BlogPost from "../components/BlogPost";
 
 const Home = () => {
   let [blogs, setBlogs] = useState(null);
@@ -38,7 +39,17 @@ const Home = () => {
                 <Loader />
               ) : (
                 blogs.map((blog, i) => {
-                  return <h1 key={i}>{blog.title}</h1>;
+                  return (
+                    <AnimationWrapper
+                      key={i}
+                      transition={{ duration: 1, delay: i * 1 }}
+                    >
+                      <BlogPost
+                        content={blog}
+                        author={blog.author.personal_info}
+                      />
+                    </AnimationWrapper>
+                  );
                 })
               )}
             </>
