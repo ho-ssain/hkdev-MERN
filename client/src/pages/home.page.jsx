@@ -8,6 +8,7 @@ import BlogPost from "../components/BlogPost";
 
 const Home = () => {
   let [blogs, setBlogs] = useState(null);
+  let [trending_blogs, setTrendingBlogs] = useState(null);
 
   const fetchLatestBlogs = () => {
     axios
@@ -20,8 +21,20 @@ const Home = () => {
       });
   };
 
+  const fetchTrendingBlogs = () => {
+    axios
+      .get(import.meta.env.VITE_SERVER_DOMAIN + "/trending-blogs")
+      .then(({ data }) => {
+        setTrendingBlogs(data.blogs);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   useEffect(() => {
     fetchLatestBlogs();
+    fetchTrendingBlogs();
   }, []);
 
   return (
@@ -53,7 +66,26 @@ const Home = () => {
                 })
               )}
             </>
-            <h1>Trending Blogs here</h1>
+
+            <>
+              {trending_blogs === null ? (
+                <Loader />
+              ) : (
+                trending_blogs.map((blog, i) => {
+                  return (
+                    <AnimationWrapper
+                      key={i}
+                      transition={{ duration: 1, delay: i * 1 }}
+                    >
+                      {/* <BlogPost
+                        content={blog}
+                        author={blog.author.personal_info}
+                      /> */}
+                    </AnimationWrapper>
+                  );
+                })
+              )}
+            </>
           </InPageNavigation>
         </div>
 
