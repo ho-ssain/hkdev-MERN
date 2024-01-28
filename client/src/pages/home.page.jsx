@@ -8,7 +8,13 @@ const Home = () => {
         {/* Latest blogs  */}
 
         <div className="w-full">
-          <InPageNavigation></InPageNavigation>
+          <InPageNavigation
+            routes={["home", "trending blogs"]}
+            defaultHidden={["trending blogs"]}
+          >
+            <h1>Latest Blogs here</h1>
+            <h1>Trending Blogs here</h1>
+          </InPageNavigation>
         </div>
 
         {/* Editors and trending blogs  */}

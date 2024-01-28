@@ -35,3 +35,4 @@
 24. Setting up Home Route in app.jsx
 25. Home Page
     1. in page navigation
+    2. Latest blog route
