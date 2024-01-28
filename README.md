@@ -36,3 +36,5 @@
 25. Home Page
     1. in page navigation
     2. Latest blog route
+    3. fetching latest blogs
+    4. Blog Card
