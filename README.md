@@ -40,3 +40,5 @@
     4. Blog Card
     5. 'trending-blogs' route
     6. fetching trending blogs
+    7. Minimal Blog Card
+    8. Filter and Trending blogs

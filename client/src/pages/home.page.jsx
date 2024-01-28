@@ -5,6 +5,7 @@ import InPageNavigation from "../components/InPageNavigation";
 import axios from "axios";
 import Loader from "../components/Loader";
 import BlogPost from "../components/BlogPost";
+import MinimalBlogPost from "../components/NoBannerBlogPost";
 
 const Home = () => {
   let [blogs, setBlogs] = useState(null);
@@ -77,10 +78,7 @@ const Home = () => {
                       key={i}
                       transition={{ duration: 1, delay: i * 1 }}
                     >
-                      {/* <BlogPost
-                        content={blog}
-                        author={blog.author.personal_info}
-                      /> */}
+                      <MinimalBlogPost blog={blog} index={i} />
                     </AnimationWrapper>
                   );
                 })
