@@ -38,3 +38,5 @@
     2. Latest blog route
     3. fetching latest blogs
     4. Blog Card
+    5. 'trending-blogs' route
+    6. fetching trending blogs
