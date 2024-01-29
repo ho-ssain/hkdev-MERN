@@ -44,3 +44,5 @@
     8. Filter and Trending blogs
 26. Working Search Input (Search Route)
 27. Searching User
+28. Search-User card UI
+29. 404 page
