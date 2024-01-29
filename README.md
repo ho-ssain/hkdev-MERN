@@ -42,3 +42,5 @@
     6. fetching trending blogs
     7. Minimal Blog Card
     8. Filter and Trending blogs
+26. Working Search Input (Search Route)
+27. Searching User
