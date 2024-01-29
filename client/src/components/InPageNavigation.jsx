@@ -1,9 +1,13 @@
+/* eslint-disable react-refresh/only-export-components */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
 
 import { useEffect, useRef, useState } from "react";
 
-/* eslint-disable react/prop-types */
+export let activeTabLineRef;
+export let activeTabRef;
+
 const InPageNavigation = ({
   routes,
   defaultHidden = [],
@@ -11,8 +15,9 @@ const InPageNavigation = ({
   children,
 }) => {
   let [inPageNavIndex, setInPageNavIndex] = useState(defaultActiveIndex);
-  let activeTabLineRef = useRef();
-  let activeTabRef = useRef();
+
+  activeTabLineRef = useRef();
+  activeTabRef = useRef();
 
   let changePageState = (btn, i) => {
     let { offsetWidth, offsetLeft } = btn;

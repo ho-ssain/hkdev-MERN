@@ -67,12 +67,10 @@ const upload = multer({
 
 //
 //
-// connecting to database.
+// connecting to database. 🖥️
 mongoose.connect(process.env.DB_LOCATION, { autoIndex: true });
 
-// Making API for listening roots/urls
-//
-//
+// Making API for listening roots/urls 🖥️
 
 const verifyJWT = (req, res, next) => {
   const authHeader = req.headers["authorization"];
@@ -368,7 +366,10 @@ server.post("/create-blog", verifyJWT, (req, res) => {
 //............................
 // Latest Blogs route 👇
 //............................
-server.get("/latest-blogs", (req, res) => {
+
+server.post("/latest-blogs", (req, res) => {
+  let { page } = req.body;
+
   let maxLimit = 5;
 
   Blog.find({ draft: false })
@@ -378,11 +379,27 @@ server.get("/latest-blogs", (req, res) => {
     )
     .sort({ publishedAt: -1 })
     .select("blog_id title des banner activity tags publishedAt -_id")
+    .skip((page - 1) * maxLimit)
     .limit(maxLimit)
     .then((blogs) => {
       return res.status(200).json({ blogs });
     })
     .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+//............................
+// all-latest-blogs-count 👇
+//............................
+
+server.post("/all-latest-blogs-count", (req, res) => {
+  Blog.countDocuments({ draft: false })
+    .then((count) => {
+      return res.status(200).json({ totalDocs: count });
+    })
+    .catch((err) => {
+      console.log(err.message);
       return res.status(500).json({ error: err.message });
     });
 });
@@ -412,9 +429,51 @@ server.get("/trending-blogs", (req, res) => {
     });
 });
 
+//............................
+// search Blogs route 👇
+//............................
+
+server.post("/search-blogs", (req, res) => {
+  let { tag, page } = req.body;
+  let findQuery = { tags: tag, draft: false };
+  let maxLimit = 5;
+  Blog.find(findQuery)
+    .populate(
+      "author",
+      "personal_info.profile_img personal_info.username personal_info.fullname -_id"
+    )
+    .sort({ publishedAt: -1 })
+    .select("blog_id title des banner activity tags publishedAt -_id")
+    .skip((page - 1) * maxLimit)
+    .limit(maxLimit)
+    .then((blogs) => {
+      return res.status(200).json({ blogs });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+//............................
+// search Blogs count route 👇
+//............................
+
+server.post("/search-blogs-count", (req, res) => {
+  let { tag } = req.body;
+  let findQuery = { tags: tag, draft: false };
+  Blog.countDocuments(findQuery)
+    .then((count) => {
+      return res.status(200).json({ totalDocs: count });
+    })
+    .catch((err) => {
+      console.log(err.message);
+      return res.status(500).json({ error: err.message });
+    });
+});
+
 //
 //....................................
-// listening on the port 👇
+//  🖥️🖥️🖥️ listening on the port 👇
 //....................................
 //
 //
