@@ -46,3 +46,5 @@
 27. Searching User
 28. Search-User card UI
 29. 404 page
+30. User Route
+31. Build User Profile Page

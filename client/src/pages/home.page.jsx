@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
-import AnimationWrapper from "../common/page-animation";
+
 import InPageNavigation, { activeTabRef } from "../components/InPageNavigation";
 import axios from "axios";
 import Loader from "../components/Loader";
@@ -10,6 +10,7 @@ import MinimalBlogPost from "../components/NoBannerBlogPost";
 import NoDataMessage from "../components/NoData";
 import FilterPaginationData from "../common/FilterPaginationData";
 import LoadMoreDataBtn from "../components/LoadMore";
+import AnimationWrapper from "../common/Page-animation";
 
 const Home = () => {
   let [blogs, setBlogs] = useState(null);
