@@ -48,3 +48,5 @@
 29. 404 page
 30. User Route
 31. Build User Profile Page
+32. Blog Page Route
+33. Edit blog

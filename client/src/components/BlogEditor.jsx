@@ -20,16 +20,14 @@ const BlogEditor = () => {
 
   let {
     blog,
-    blog: { title, banner, content, tags, des },
+    blog: { title, banner, content, tags, des } = {},
     setBlog,
     textEditor,
     setTextEditor,
     setEditorState,
   } = useContext(EditorContext);
 
-  let {
-    userAuth: { accessToken },
-  } = useContext(UserContext);
+  let { userAuth: { accessToken } = {} } = useContext(UserContext);
 
   // useEffect
 
