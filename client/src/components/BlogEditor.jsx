@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import logo from "../assets/logo-2.png";
 import AnimationWrapper from "../common/page-animation";
 import defaultBanner from "../assets/blog banner.png";
@@ -29,6 +29,8 @@ const BlogEditor = () => {
 
   let { userAuth: { accessToken } = {} } = useContext(UserContext);
 
+  let { blog_id } = useParams();
+
   // useEffect
 
   useEffect(() => {
@@ -36,7 +38,7 @@ const BlogEditor = () => {
       setTextEditor(
         new EditorJS({
           holder: "textEditor",
-          data: content,
+          data: Array.isArray(content) ? content[0] : content,
           tools: Tools,
           placeholder: "Write here...",
         })
@@ -147,11 +149,15 @@ const BlogEditor = () => {
         };
 
         axios
-          .post(import.meta.env.VITE_SERVER_DOMAIN + "/create-blog", blogObj, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          })
+          .post(
+            import.meta.env.VITE_SERVER_DOMAIN + "/create-blog",
+            { ...blogObj, id: blog_id },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          )
           .then(() => {
             e.target.classList.remove("disable");
             toast.dismiss(loadingToast);
