@@ -16,26 +16,18 @@ import cloudinary from "./utils/cloudinary.js";
 //Schema's................
 import User from "./Schema/User.js";
 import Blog from "./Schema/Blog.js";
+import Notification from "./Schema/Notification.js";
+
 import { error } from "console";
 
-//
-//
 // 🖥️
 const server = express();
 let PORT = 3000;
 
-//
-//
 //middle wares
 server.use(cors());
 server.use(express.json({ limit: "50mb" }));
 server.use(express.urlencoded({ limit: "50mb", extended: true }));
-
-//
-//
-//
-//
-//
 
 //
 // admin.initializeApp({
@@ -66,12 +58,10 @@ const upload = multer({
 
  */
 
-//
-//
 // connecting to database. 🖥️
 mongoose.connect(process.env.DB_LOCATION, { autoIndex: true });
 
-// Making API for listening roots/urls 🖥️
+//------------------ Making API for listening roots/urls 🖥️
 
 const verifyJWT = (req, res, next) => {
   const authHeader = req.headers["authorization"];
@@ -111,10 +101,7 @@ const formatDataToSend = (user) => {
   };
 };
 
-//..................
 // sign-up root 👇
-//..................
-
 server.post("/signup", (req, res) => {
   let { fullname, email, password } = req.body;
 
@@ -162,10 +149,7 @@ server.post("/signup", (req, res) => {
   // return res.status(200).json({ status: "Okay" });
 });
 
-//..................
 // sign-in route 👇
-//..................
-
 server.post("/signin", (req, res) => {
   let { email, password } = req.body;
 
@@ -196,9 +180,7 @@ server.post("/signin", (req, res) => {
     });
 });
 
-//............................
 // sign-in with google-auth 👇
-//............................
 
 server.post("/google-auth", async (req, res) => {
   let { accessToken } = req.body;
@@ -256,10 +238,7 @@ server.post("/google-auth", async (req, res) => {
     );
 });
 
-//..................
 //  upload Banner image route 👇
-//..................
-
 server.post("/bannerUpload", (req, res) => {
   const fileStr = req.body.data;
   // console.log(fileStr);
@@ -283,10 +262,7 @@ server.post("/bannerUpload", (req, res) => {
     .catch((err) => res.status(500).send(err));
 });
 
-//............................
 // Publish Blog route 👇
-//............................
-
 server.post("/create-blog", verifyJWT, (req, res) => {
   let authorId = req.user;
   let { title, des, banner, tags, content, draft, id } = req.body;
@@ -333,7 +309,7 @@ server.post("/create-blog", verifyJWT, (req, res) => {
   if (id) {
     Blog.findOneAndUpdate(
       { blog_id },
-      { title, des, banner, content, tags, draft: draft ? draft : false }
+      { title, des, banner, content, tags, draft: draft || false }
     )
       .then(() => {
         return res.status(200).json({ id: blog_id });
@@ -379,10 +355,7 @@ server.post("/create-blog", verifyJWT, (req, res) => {
   }
 });
 
-//............................
 // Latest Blogs route 👇
-//............................
-
 server.post("/latest-blogs", (req, res) => {
   let { page } = req.body;
 
@@ -405,10 +378,7 @@ server.post("/latest-blogs", (req, res) => {
     });
 });
 
-//............................
 // all-latest-blogs-count 👇
-//............................
-
 server.post("/all-latest-blogs-count", (req, res) => {
   Blog.countDocuments({ draft: false })
     .then((count) => {
@@ -420,10 +390,7 @@ server.post("/all-latest-blogs-count", (req, res) => {
     });
 });
 
-//............................
 // trending Blogs route 👇
-//............................
-
 server.get("/trending-blogs", (req, res) => {
   Blog.find({ draft: false })
     .populate(
@@ -445,10 +412,7 @@ server.get("/trending-blogs", (req, res) => {
     });
 });
 
-//............................
 // search Blogs route 👇
-//............................
-
 server.post("/search-blogs", (req, res) => {
   let { tag, page, query, author, limit, element_blog } = req.body;
   let findQuery;
@@ -461,7 +425,8 @@ server.post("/search-blogs", (req, res) => {
     findQuery = { author, draft: false };
   }
 
-  let maxLimit = limit ? limit : 2;
+  let maxLimit = limit || 2;
+
   Blog.find(findQuery)
     .populate(
       "author",
@@ -479,10 +444,7 @@ server.post("/search-blogs", (req, res) => {
     });
 });
 
-//............................
 // search Blogs count route 👇
-//............................
-
 server.post("/search-blogs-count", (req, res) => {
   let { tag, query, author } = req.body;
   let findQuery;
@@ -505,10 +467,7 @@ server.post("/search-blogs-count", (req, res) => {
     });
 });
 
-//............................
 // search users route 👇
-//............................
-
 server.post("/search-users", (req, res) => {
   let { query } = req.body;
 
@@ -525,10 +484,7 @@ server.post("/search-users", (req, res) => {
     });
 });
 
-//............................
 // user profile route 👇
-//............................
-
 server.post("/get-profile", (req, res) => {
   let { username } = req.body;
   User.findOne({ "personal_info.username": username })
@@ -541,10 +497,7 @@ server.post("/get-profile", (req, res) => {
     });
 });
 
-//............................
-// user profile route 👇
-//............................
-
+// get blog route 👇
 server.post("/get-blog", (req, res) => {
   let { blog_id, draft, mode } = req.body;
   let incrementVal = mode !== "edit" ? 1 : 0;
@@ -583,10 +536,56 @@ server.post("/get-blog", (req, res) => {
     });
 });
 
-//
-//
-//
-//
+// like blog route 👇
+server.post("/like-blog", verifyJWT, (req, res) => {
+  let user_id = req.user;
+  let { _id, isLikeByUser } = req.body;
+  let incrementVal = !isLikeByUser ? 1 : -1;
+  Blog.findOneAndUpdate(
+    { _id },
+    { $inc: { "activity.total_likes": incrementVal } }
+  ).then((blog) => {
+    if (!isLikeByUser) {
+      let like = new Notification({
+        type: "like",
+        blog: _id,
+        notification_for: blog.author,
+        user: user_id,
+      });
+
+      like.save().then((notification) => {
+        return res.status(200).json({ liked_by_user: true });
+      });
+    } else {
+      Notification.findOneAndDelete({
+        user: user_id,
+        blog: _id,
+        type: "like",
+      })
+        .then((data) => {
+          return res.status(200).json({ liked_by_user: false });
+        })
+        .catch((err) => {
+          return res.status(500).json(err.message);
+        });
+    }
+  });
+});
+
+// is liked by User? route 👇
+server.post("/isliked-by-user", verifyJWT, (req, res) => {
+  let user_id = req.user;
+  let { _id } = req.body;
+
+  Notification.exists({ user: user_id, type: "like", blog: _id })
+    .then((result) => {
+      return res.status(200).json({ result });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
+
 //
 //....................................
 //  🖥️🖥️🖥️ listening on the port 👇 🖥️🖥️🖥️

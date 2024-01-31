@@ -28,6 +28,8 @@ const Blog = () => {
   const [blog, setBlog] = useState(blogStructure);
   const [similarBlog, setSimilarBlog] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isLikeByUser, setLikeByUser] = useState(false);
+
   let {
     title,
     content,
@@ -79,7 +81,9 @@ const Blog = () => {
       {loading ? (
         <Loader />
       ) : (
-        <BlogContext.Provider value={{ blog, setBlog }}>
+        <BlogContext.Provider
+          value={{ blog, setBlog, isLikeByUser, setLikeByUser }}
+        >
           <div className="max-w-[900px] center py-10 max-lg:px-[5vw]">
             {/* ................................................  */}
             <img src={banner} alt="banner" className="aspect-video" />
