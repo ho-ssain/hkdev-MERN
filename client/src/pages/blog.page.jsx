@@ -11,6 +11,7 @@ import { getDay } from "../common/date";
 import BlogInteraction from "../components/BlogInteraction";
 import BlogPost from "../components/BlogPost";
 import BlogContent from "../components/BlogContent";
+import CommentsContainer, { fetchComments } from "../components/Comments";
 
 export const blogStructure = {
   title: "",
@@ -29,6 +30,8 @@ const Blog = () => {
   const [similarBlog, setSimilarBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isLikeByUser, setLikeByUser] = useState(false);
+  const [commentWrapper, setCommentWrapper] = useState(false);
+  const [totalParentCommentsLoaded, setTotalParentCommentsLoaded] = useState(0);
 
   let {
     title,
@@ -43,7 +46,11 @@ const Blog = () => {
   const fetchBlog = () => {
     axios
       .post(import.meta.env.VITE_SERVER_DOMAIN + "/get-blog", { blog_id })
-      .then(({ data: { blog } }) => {
+      .then(async ({ data: { blog } }) => {
+        blog.comments = await fetchComments({
+          blog_id: blog._id,
+          setParentCommentCountFun: setTotalParentCommentsLoaded,
+        });
         setBlog(blog);
 
         axios
@@ -74,6 +81,9 @@ const Blog = () => {
     setBlog(blogStructure);
     setSimilarBlog(null);
     setLoading(true);
+    setLikeByUser(false);
+    setCommentWrapper(false);
+    setTotalParentCommentsLoaded(0);
   };
 
   return (
@@ -82,13 +92,23 @@ const Blog = () => {
         <Loader />
       ) : (
         <BlogContext.Provider
-          value={{ blog, setBlog, isLikeByUser, setLikeByUser }}
+          value={{
+            blog,
+            setBlog,
+            isLikeByUser,
+            setLikeByUser,
+            commentWrapper,
+            setCommentWrapper,
+            totalParentCommentsLoaded,
+            setTotalParentCommentsLoaded,
+          }}
         >
+          <CommentsContainer />
           <div className="max-w-[900px] center py-10 max-lg:px-[5vw]">
-            {/* ................................................  */}
+            {/* .......................................  */}
             <img src={banner} alt="banner" className="aspect-video" />
 
-            {/* ................................................. */}
+            {/* ........................................ */}
             <div className="mt-12">
               <h2>{title}</h2>
 
