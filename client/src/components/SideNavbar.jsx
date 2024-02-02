@@ -7,6 +7,7 @@ const SideNavbar = () => {
   let { userAuth } = useContext(UserContext);
 
   let accessToken = userAuth?.accessToken;
+  let new_notification_available = userAuth?.new_notification_available;
 
   let page = location.pathname.split("/")[2];
 
@@ -86,7 +87,18 @@ const SideNavbar = () => {
               setPageState(e.target.innerText);
             }}
           >
-            <i className="fi fi-rr-bell"></i>Notification
+            <div className="relative">
+              <i className="fi fi-rr-bell"></i>
+              {
+                //........................
+                new_notification_available ? (
+                  <span className="bg-red w-3 h-3 rounded-full absolute z-10 top-2 right-2"></span>
+                ) : (
+                  ""
+                )
+              }
+            </div>
+            Notification
           </NavLink>
 
           <NavLink

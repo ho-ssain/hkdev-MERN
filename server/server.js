@@ -239,7 +239,7 @@ server.post("/google-auth", async (req, res) => {
     );
 });
 
-//  upload Banner image route 👇
+//  upload image in cloudinary 👇
 server.post("/bannerUpload", (req, res) => {
   const fileStr = req.body.data;
   // console.log(fileStr);
@@ -498,6 +498,75 @@ server.post("/get-profile", (req, res) => {
     });
 });
 
+// update profile image in db
+server.post("/update-profile-img", verifyJWT, (req, res) => {
+  let { url } = req.body;
+  User.findOneAndUpdate({ _id: req.user }, { "personal_info.profile_img": url })
+    .then((err) => {
+      return res.status(200).json({ profile_img: url });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+// update-profile
+server.post("/update-profile", verifyJWT, (req, res) => {
+  let { username, bio, social_links } = req.body;
+  let bioLimit = 150;
+  let socialLinksKeyArr = Object.keys(social_links);
+
+  if (username.length < 3) {
+    return res
+      .status(403)
+      .json({ error: "username should be at least 3 letters long" });
+  }
+
+  if (bio.length > bioLimit) {
+    return res
+      .status(403)
+      .json({ error: `bio should not be more than ${bioLimit}` });
+  }
+
+  try {
+    for (let i = 0; i < socialLinksKeyArr.length; i++) {
+      if (social_links[socialLinksKeyArr[i]].length) {
+        let hostname = new URL(social_links[socialLinksKeyArr[i]]).hostname;
+
+        if (
+          !hostname.includes(`${socialLinksKeyArr[i]}.com`) &&
+          socialLinksKeyArr[i] !== "website"
+        ) {
+          return res.status(403).json({
+            error: `${socialLinksKeyArr[i]} link is invalid. you must enter a valid full link`,
+          });
+        }
+      }
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "you must provide full social links with http(s) included.",
+    });
+  }
+
+  let updateObj = {
+    "personal_info.username": username,
+    "personal_info.bio": bio,
+    social_links,
+  };
+
+  User.findOneAndUpdate({ _id: req.user }, updateObj, { runValidators: true })
+    .then(() => {
+      return res.status(200).json({ username });
+    })
+    .catch((err) => {
+      if (err.code === 11000) {
+        return res.status(403).json({ error: "username is already taken" });
+      }
+      return res.status(500).json({ error: err.message });
+    });
+});
+
 // get blog route 👇
 server.post("/get-blog", (req, res) => {
   let { blog_id, draft, mode } = req.body;
@@ -739,6 +808,27 @@ server.post("/change-password", verifyJWT, (req, res) => {
     .catch((err) => {
       console.log(err);
       return res.status(500).json({ error: "User not Found!" });
+    });
+});
+
+// new notification route
+server.get("/new-notification", verifyJWT, (req, res) => {
+  let user_id = req.user;
+  Notification.exists({
+    notification_for: user_id,
+    seen: false,
+    user: { $ne: user_id },
+  })
+    .then((result) => {
+      if (result) {
+        return res.status(200).json({ new_notification_available: true });
+      } else {
+        return res.status(200).json({ new_notification_available: false });
+      }
+    })
+    .catch((err) => {
+      console.log(err.message);
+      return res.status(500).json({ error: err.message });
     });
 });
 

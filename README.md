@@ -52,3 +52,6 @@
 33. Edit blog
 34. Like Blog
 35. comment Section
+36. Change Password
+37. Edit Profile
+38. Notification feature
