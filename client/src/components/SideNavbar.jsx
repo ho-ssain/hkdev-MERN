@@ -82,7 +82,7 @@ const SideNavbar = () => {
 
           <NavLink
             className="sidebar-link"
-            to="/dashboard/notification"
+            to="/dashboard/notifications"
             onClick={(e) => {
               setPageState(e.target.innerText);
             }}
@@ -98,7 +98,7 @@ const SideNavbar = () => {
                 )
               }
             </div>
-            Notification
+            Notifications
           </NavLink>
 
           <NavLink

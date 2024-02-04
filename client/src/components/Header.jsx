@@ -3,14 +3,17 @@
 import { useContext, useEffect, useState } from "react";
 import logo from "../assets/logo-1.png";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { UserContext } from "../App";
+import { ThemeContext, UserContext } from "../App";
 import UserNavigationPanel from "./UserNavigationPanel ";
 import axios from "axios";
+import { storeInSession } from "../common/Session";
 
 // import { IoIosSearch } from "react-icons/io";
 // import { FaEdit } from "react-icons/fa";
 
 const Header = () => {
+  let { theme, setTheme } = useContext(ThemeContext);
+
   const [searchBoxVisibility, setSearchBoxVisibility] = useState(false);
 
   const [userNavPanel, setUserNavPanel] = useState(false);
@@ -58,6 +61,13 @@ const Header = () => {
     }
   };
 
+  const changeTheme = () => {
+    let newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    document.body.setAttribute("data-theme", newTheme);
+    storeInSession("theme", newTheme);
+  };
+
   return (
     <>
       <header>
@@ -101,9 +111,16 @@ const Header = () => {
               <p>Write</p>
             </Link>
 
+            <button
+              className="w-12 h-12 rounded-full bg-grey relative hover:bg-black/10"
+              onClick={changeTheme}
+            >
+              <i className="fi fi-rr-moon-stars"></i>
+            </button>
+
             {accessToken ? (
               <>
-                <Link to="/dashboard/notification">
+                <Link to="/dashboard/notifications">
                   <button className="w-12 h-12 rounded-full bg-grey relative hover:bg-black/10">
                     <i className="fi fi-rr-bell text-2xl block mt-1"></i>
                     {
