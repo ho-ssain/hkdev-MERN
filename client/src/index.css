@@ -55,7 +55,7 @@
   }
 
   .input-box {
-    @apply w-[100%] rounded-md p-4 bg-grey pl-12 border border-grey focus:bg-transparent placeholder:text-black;
+    @apply w-[100%] rounded-md p-3 bg-grey pl-12 border border-grey focus:bg-transparent placeholder:text-black;
   }
 
   input:disabled,
@@ -108,7 +108,7 @@
   }
 
   .tag {
-    @apply p-3 bg-grey rounded-full px-6 capitalize;
+    @apply p-3 bg-grey rounded-full px-6;
   }
 
   .blog-title {

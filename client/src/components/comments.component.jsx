@@ -3,11 +3,11 @@
 
 import { useContext } from "react";
 import { BlogContext } from "../pages/blog.page";
-import CommentField from "./CommentField";
+import CommentField from "./comment-field.component";
 import axios from "axios";
 import AnimationWrapper from "../common/page-animation";
-import NoDataMessage from "./NoData";
-import CommentCard from "./CommentCard";
+import NoDataMessage from "./nodata.component";
+import CommentCard from "./comment-card.component";
 
 export const fetchComments = async ({
   skip = 0,
@@ -43,7 +43,7 @@ const CommentsContainer = () => {
     blog: {
       _id,
       title,
-      comments: { results: commentArr },
+      comments: { results: commentsArr },
       activity: { total_parent_comments },
     },
     setBlog,
@@ -53,17 +53,20 @@ const CommentsContainer = () => {
     setTotalParentCommentsLoaded,
   } = useContext(BlogContext);
 
-  // console.log(commentArr);
+  // console.log(commentsArr);
+
+  // console.log("totalParentCommentsLoaded -: " + totalParentCommentsLoaded);
+  // console.log(total_parent_comments);
 
   const loadMoreComments = async () => {
-    let newCommentArr = await fetchComments({
+    let newcommentsArr = await fetchComments({
       skip: totalParentCommentsLoaded,
       blog_id: _id,
       setParentCommentCountFun: setTotalParentCommentsLoaded,
-      comment_array: commentArr,
+      comment_array: commentsArr,
     });
 
-    setBlog({ ...blog, comments: newCommentArr });
+    setBlog({ ...blog, comments: newcommentsArr });
   };
 
   return (
@@ -81,10 +84,10 @@ const CommentsContainer = () => {
         </p>
 
         <button
-          className="absolute top-0 right-0 flex justify-center items-center w-12 h-12 rounded-full bg-grey"
+          className="absolute top-0 right-0 flex justify-center items-center w-10 h-10 rounded-full bg-grey"
           onClick={() => setCommentWrapper((preVal) => !preVal)}
         >
-          <i className="fi fi-br-cross text-2xl mt-1"></i>
+          <i className="fi fi-br-cross text-xl mt-1"></i>
         </button>
       </div>
 
@@ -94,8 +97,8 @@ const CommentsContainer = () => {
 
       {
         //..................
-        commentArr && commentArr.length ? (
-          commentArr.map((comment, i) => {
+        commentsArr && commentsArr.length ? (
+          commentsArr.map((comment, i) => {
             return (
               <AnimationWrapper key={i}>
                 <CommentCard

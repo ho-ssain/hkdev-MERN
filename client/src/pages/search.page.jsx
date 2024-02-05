@@ -1,16 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import { useParams } from "react-router-dom";
-import InPageNavigation from "../components/InPageNavigation";
-import LoadMoreDataBtn from "../components/LoadMore";
+import InPageNavigation from "../components/inpage-navigation.component";
+import LoadMoreDataBtn from "../components/load-more.component";
 import AnimationWrapper from "../common/page-animation";
 import { useEffect, useState } from "react";
-import Loader from "../components/Loader";
-import BlogPost from "../components/BlogPost";
-import NoDataMessage from "../components/NoData";
+import Loader from "../components/loader.component";
+import BlogPost from "../components/blog-post.component";
+import NoDataMessage from "../components/nodata.component";
 import axios from "axios";
-import FilterPaginationData from "../common/FilterPaginationData";
-import UserCard from "../components/UserCard";
+import FilterPaginationData from "../common/filter-pagination-data";
+import UserCard from "../components/usercard.component";
 
 const Search = () => {
   let { query } = useParams();
@@ -71,7 +71,7 @@ const Search = () => {
               return (
                 <AnimationWrapper
                   key={i}
-                  transition={{ duration: 1, delay: i * 0.5 }}
+                  transition={{ duration: 1, delay: i * 0.1 }}
                 >
                   <UserCard user={user} />
                 </AnimationWrapper>
@@ -100,7 +100,7 @@ const Search = () => {
                 return (
                   <AnimationWrapper
                     key={i}
-                    transition={{ duration: 1, delay: i * 0.2 }}
+                    transition={{ duration: 1, delay: i * 0.1 }}
                   >
                     <BlogPost
                       content={blog}

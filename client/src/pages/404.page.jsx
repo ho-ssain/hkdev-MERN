@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import page404 from "../assets/404.png";
-import logo from "../assets/logo-1.png";
+import logo from "../assets/logo.png";
 
 const PageNotFound = () => {
   return (

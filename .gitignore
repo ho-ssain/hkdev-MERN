@@ -1,4 +1,3 @@
-**/.vscode
 # Logs
 logs
 *.log
@@ -24,5 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-.env
+*.env
 *.rest
+firebase-adminsdk.json

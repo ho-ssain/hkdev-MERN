@@ -2,11 +2,12 @@
 import { Toaster, toast } from "react-hot-toast";
 import AnimationWrapper from "../common/page-animation";
 import { useContext } from "react";
-import { EditorContext } from "../pages/editor.page";
-import Tags from "./Tags";
+
 import axios from "axios";
 import { UserContext } from "../App";
 import { useNavigate, useParams } from "react-router-dom";
+import { EditorContext } from "../pages/editor.pages";
+import Tags from "./tags.component";
 
 const PublishForm = () => {
   let { blog_id } = useParams();
@@ -186,7 +187,7 @@ const PublishForm = () => {
             {tagLimit - tags.length} Tags Left
           </p>
 
-          <button className="btn-dark px-8" onClick={publishBlog}>
+          <button className="btn-dark px-8 py-2" onClick={publishBlog}>
             Publish
           </button>
         </div>

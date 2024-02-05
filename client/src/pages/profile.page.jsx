@@ -4,15 +4,15 @@
 import { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
-import AnimationWrapper from "../common/Page-animation";
-import Loader from "../components/Loader";
+import AnimationWrapper from "../common/page-animation";
+import Loader from "../components/loader.component";
 import { UserContext } from "../App";
-import About from "../components/About";
-import FilterPaginationData from "../common/FilterPaginationData";
-import InPageNavigation from "../components/InPageNavigation";
-import BlogPost from "../components/BlogPost";
-import NoDataMessage from "../components/NoData";
-import LoadMoreDataBtn from "../components/LoadMore";
+import About from "../components/about.component";
+import FilterPaginationData from "../common/filter-pagination-data";
+import InPageNavigation from "../components/inpage-navigation.component";
+import BlogPost from "../components/blog-post.component";
+import NoDataMessage from "../components/nodata.component";
+import LoadMoreDataBtn from "../components/load-more.component";
 import PageNotFound from "./404.page";
 
 export const profileDataStructure = {

@@ -2,15 +2,17 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 
-import InPageNavigation, { activeTabRef } from "../components/InPageNavigation";
+import InPageNavigation, {
+  activeTabRef,
+} from "../components/inpage-navigation.component";
 import axios from "axios";
-import Loader from "../components/Loader";
-import BlogPost from "../components/BlogPost";
-import MinimalBlogPost from "../components/NoBannerBlogPost";
-import NoDataMessage from "../components/NoData";
-import FilterPaginationData from "../common/FilterPaginationData";
-import LoadMoreDataBtn from "../components/LoadMore";
-import AnimationWrapper from "../common/Page-animation";
+import Loader from "../components/loader.component";
+import BlogPost from "../components//blog-post.component";
+import MinimalBlogPost from "../components/nobanner-blog-post.component";
+import NoDataMessage from "../components/nodata.component";
+import FilterPaginationData from "../common/filter-pagination-data";
+import LoadMoreDataBtn from "../components/load-more.component";
+import AnimationWrapper from "../common/page-animation";
 
 const Home = () => {
   let [blogs, setBlogs] = useState(null);
@@ -24,33 +26,32 @@ const Home = () => {
     "mongodb",
     "react",
     "next",
-    "vs code",
+    "vs-code",
     "git",
     "html",
     "css",
     "tailwind",
     "typescript",
-    "dsa with js",
-    "web programming",
-    "web architecture",
-    "js testing",
+    "dsa-with-js",
+    "web-programming",
+    "web-architecture",
+    "js-testing",
     "api",
     "web",
+    "rest-api",
   ];
 
   const fetchLatestBlogs = ({ page = 1 }) => {
     axios
       .post(import.meta.env.VITE_SERVER_DOMAIN + "/latest-blogs", { page })
       .then(async ({ data }) => {
-        console.log(data.blogs);
-
         let formattedData = await FilterPaginationData({
           state: blogs,
           data: data.blogs,
           page,
           countRoute: "/all-latest-blogs-count",
         });
-        console.log(formattedData);
+        // console.log(formattedData);
         setBlogs(formattedData);
       })
       .catch((err) => {
@@ -71,6 +72,7 @@ const Home = () => {
 
   const loadBlogByCategory = (e) => {
     let category = e.target.innerText.toLowerCase();
+
     setBlogs(null);
     if (pageSate === category) {
       setPageState("home");
@@ -129,12 +131,12 @@ const Home = () => {
                 // Latest blogs
                 blogs === null ? (
                   <Loader />
-                ) : blogs.results.length ? (
+                ) : blogs?.results.length ? (
                   blogs.results.map((blog, i) => {
                     return (
                       <AnimationWrapper
                         key={i}
-                        transition={{ duration: 1, delay: i * 0.2 }}
+                        transition={{ duration: 1, delay: i * 0.1 }}
                       >
                         <BlogPost
                           content={blog}
@@ -161,12 +163,12 @@ const Home = () => {
                 // trending blogs
                 trending_blogs === null ? (
                   <Loader />
-                ) : trending_blogs.length ? (
+                ) : trending_blogs?.length ? (
                   trending_blogs.map((blog, i) => {
                     return (
                       <AnimationWrapper
                         key={i}
-                        transition={{ duration: 1, delay: i * 0.2 }}
+                        transition={{ duration: 1, delay: i * 0.1 }}
                       >
                         <MinimalBlogPost blog={blog} index={i} />
                       </AnimationWrapper>
@@ -195,6 +197,7 @@ const Home = () => {
                     <button
                       key={i}
                       className={
+                        "py-2.5 px-3 " +
                         "tag " +
                         (pageSate === category ? "bg-black text-white" : "")
                       }

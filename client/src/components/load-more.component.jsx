@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 const LoadMoreDataBtn = ({ state, fetchData, additionalParam }) => {
-  if (state !== null && state.totalDocs > state.results.length) {
+  if (state !== null && state?.totalDocs > state?.results.length) {
     return (
       <button
         onClick={() => fetchData({ ...additionalParam, page: state.page + 1 })}

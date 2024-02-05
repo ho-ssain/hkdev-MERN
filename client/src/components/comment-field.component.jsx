@@ -58,9 +58,9 @@ const CommentField = ({
 
         if (replyingTo) {
           commentsArr[index].children.push(data._id);
-          data.childrenLevel = commentsArr[index].childrenLevel = 1;
+          data.childrenLevel = commentsArr[index].childrenLevel + 1;
           data.parentIndex = index;
-          commentsArr[index].setIsReplying = true;
+          commentsArr[index].isReplyLoaded = true;
           commentsArr.splice(index + 1, 0, data);
           newCommentArr = commentsArr;
           setIsReplying(false);
@@ -101,7 +101,7 @@ const CommentField = ({
         placeholder="Leave a comment..."
         className="input-box pl-5 placeholder:text-dark-grey resize-none h-[150px] overflow-auto"
       ></textarea>
-      <button className="btn-dark mt-5 px-7" onClick={habileComment}>
+      <button className="btn-dark mt-5 px-5 py-2" onClick={habileComment}>
         {action}
       </button>
     </>

@@ -1,13 +1,8 @@
 /* eslint-disable no-unused-vars */
+
 import { initializeApp } from "firebase/app";
-import {
-  GoogleAuthProvider,
-  getAuth,
-  signInWithCredential,
-  signInWithPopup,
-  signInWithRedirect,
-} from "firebase/auth";
-// Your web app's Firebase configuration
+import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
+
 const firebaseConfig = {
   apiKey: "AIzaSyDprss6z_PX_K862IPIZUXzSTyYXxvigkI",
   authDomain: "hkdev-ea2eb.firebaseapp.com",
@@ -21,13 +16,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // google auth
+
 const provider = new GoogleAuthProvider();
 const auth = getAuth();
 
 export const authWithGoogle = async () => {
   let user = null;
 
-  await signInWithRedirect(auth, provider)
+  await signInWithPopup(auth, provider)
     .then((res) => {
       user = res.user;
     })

@@ -6,12 +6,14 @@ import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { createContext, useEffect, useState } from "react";
 import AnimationWrapper from "../common/page-animation";
-import Loader from "../components/Loader";
+import Loader from "../components/loader.component";
 import { getDay } from "../common/date";
-import BlogInteraction from "../components/BlogInteraction";
-import BlogPost from "../components/BlogPost";
-import BlogContent from "../components/BlogContent";
-import CommentsContainer, { fetchComments } from "../components/Comments";
+import BlogInteraction from "../components/blog-interaction.component";
+import BlogPost from "../components/blog-post.component";
+import BlogContent from "../components/blog-content.component";
+import CommentsContainer, {
+  fetchComments,
+} from "../components/comments.component";
 
 export const blogStructure = {
   title: "",
@@ -24,7 +26,7 @@ export const blogStructure = {
 
 export const BlogContext = createContext({});
 
-const Blog = () => {
+const BlogPage = () => {
   let { blog_id } = useParams();
   const [blog, setBlog] = useState(blogStructure);
   const [similarBlog, setSimilarBlog] = useState(null);
@@ -181,4 +183,4 @@ const Blog = () => {
   );
 };
 
-export default Blog;
+export default BlogPage;

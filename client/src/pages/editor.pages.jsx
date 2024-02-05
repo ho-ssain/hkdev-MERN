@@ -1,12 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { UserContext } from "../App";
 import { Navigate, useParams } from "react-router-dom";
-import BlogEditor from "../components/BlogEditor";
-import PublishForm from "../components/PublishForm";
-import Loader from "../components/Loader";
+
 import axios from "axios";
+import BlogEditor from "../components/blog-editor.component";
+import PublishForm from "../components/publish-form.component";
+import Loader from "../components/loader.component";
 
 const blogStructure = {
   title: "",

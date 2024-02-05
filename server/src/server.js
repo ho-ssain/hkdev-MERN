@@ -1,69 +1,45 @@
-import express, { json } from "express";
-import mongoose from "mongoose";
-import "dotenv/config";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { nanoid } from "nanoid";
-import cors from "cors";
-import multer from "multer";
-import path, { resolve } from "path";
-import admin from "firebase-admin";
-import fileUpload from "express-fileupload";
-// import serviceAccountKey from "./hkdev-ea2eb-firebase-adminsdk-kmzwr-f1baba000d.json" assert { type: "json" };
+// regex for email, password
+const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
 
+import express, { json } from "express";
+import "dotenv/config";
+import mongoose from "mongoose";
+import bcrypt from "bcrypt";
+import { nanoid } from "nanoid";
+import jwt from "jsonwebtoken";
+import cors from "cors";
 import { getAuth } from "firebase-admin/auth";
+import admin from "firebase-admin";
 import cloudinary from "./utils/cloudinary.js";
-//Schema's................
+import serviceAccount from "./firebase-adminsdk.json" assert { type: "json" };
+
+// Schemas
 import User from "./Schema/User.js";
 import Blog from "./Schema/Blog.js";
 import Notification from "./Schema/Notification.js";
 import Comment from "./Schema/Comment.js";
 
-import { error } from "console";
-
-// 🖥️
+// creating express server
 const server = express();
-let PORT = 3000;
 
-//middle wares
+// middle wares
 server.use(cors());
 server.use(express.json({ limit: "50mb" }));
 server.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-//
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccountKey),
-// });
+// Connecting to the Database
+mongoose
+  .connect(process.env.DB_LOCATION, { autoIndex: true, dbName: "hkDev" })
+  .then((c) => console.log(`Connected to ${c.connection.name} Database`))
+  .catch((e) => console.log(e));
 
-// regex for email, password
-let emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
-
-/* 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "public/imgs");
-  },
-  filename: (req, file, cb) => {
-    cb(
-      null,
-      file.fieldname + "_" + Date.now() + path.extname(file.originalname)
-    );
-  },
+// firebase service account (connect to firebase as a admin)
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
 });
 
-
-const upload = multer({
-  storage: storage,
-});
-
- */
-
-// connecting to database. 🖥️
-mongoose.connect(process.env.DB_LOCATION, { autoIndex: true });
-
-//------------------ Making API for listening roots/urls 🖥️
-
+// jwt verify
 const verifyJWT = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
@@ -79,30 +55,7 @@ const verifyJWT = (req, res, next) => {
   });
 };
 
-const generatedUsername = async (email) => {
-  let username = email.split("@")[0];
-  let isUsernameNotUnique = await User.exists({
-    "personal_info.username": username,
-  }).then((result) => result);
-
-  if (isUsernameNotUnique) {
-    username += nanoid().substring(0, 5);
-  }
-  return username;
-};
-
-const formatDataToSend = (user) => {
-  const accessToken = jwt.sign({ id: user._id }, process.env.SECRET_ACCESS_KEY);
-
-  return {
-    accessToken,
-    profile_img: user.personal_info.profile_img,
-    username: user.personal_info.username,
-    fullname: user.personal_info.fullname,
-  };
-};
-
-// sign-up root 👇
+// sign-up route 👇
 server.post("/signup", (req, res) => {
   let { fullname, email, password } = req.body;
 
@@ -124,8 +77,11 @@ server.post("/signup", (req, res) => {
         "Password should be 6 to 20 characters long with a numeric, 1 lowercase and 1 uppercase letters!",
     });
   }
+
+  // bcrypt the password and save into database
   bcrypt.hash(password, 10, async (err, hashed_password) => {
     let username = await generatedUsername(email);
+
     let user = new User({
       personal_info: {
         fullname,
@@ -134,6 +90,7 @@ server.post("/signup", (req, res) => {
         username,
       },
     });
+
     user
       .save()
       .then((u) => {
@@ -146,9 +103,32 @@ server.post("/signup", (req, res) => {
         return res.status(500).json({ error: err.message });
       });
   });
-
-  // return res.status(200).json({ status: "Okay" });
 });
+
+// generating new unique usernames
+const generatedUsername = async (email) => {
+  let username = email.split("@")[0];
+  let isUsernameExist = await User.exists({
+    "personal_info.username": username,
+  }).then((result) => result);
+
+  if (isUsernameExist) {
+    username += nanoid().substring(0, 5);
+  }
+  return username;
+};
+
+// sending the data to frontend in formatted way.
+const formatDataToSend = (user) => {
+  const accessToken = jwt.sign({ id: user._id }, process.env.SECRET_ACCESS_KEY);
+
+  return {
+    accessToken,
+    profile_img: user.personal_info.profile_img,
+    username: user.personal_info.username,
+    fullname: user.personal_info.fullname,
+  };
+};
 
 // sign-in route 👇
 server.post("/signin", (req, res) => {
@@ -160,20 +140,24 @@ server.post("/signin", (req, res) => {
         return res.status(403).json({ error: "Email not found!" });
       }
 
-      bcrypt.compare(password, user.personal_info.password, (err, result) => {
-        if (err) {
-          return res.status(403).json({
-            error: "😓Error occurred while login. Please try again! ",
-          });
-        }
-        if (!result) {
-          return res.status(403).json({ error: "Incorrect Password!" });
-        } else {
-          return res.status(200).json(formatDataToSend(user));
-        }
-      });
-
-      // return res.json({ status: "🙂Got user document!" });
+      if (!user.google_auth) {
+        bcrypt.compare(password, user.personal_info.password, (err, result) => {
+          if (err) {
+            return res.status(403).json({
+              error: "😓Error occurred while login. Please try again! ",
+            });
+          }
+          if (!result) {
+            return res.status(403).json({ error: "Incorrect Password!" });
+          } else {
+            return res.status(200).json(formatDataToSend(user));
+          }
+        });
+      } else {
+        return res.status(403).json({
+          error: "Account was created using google! Try logging with Google ",
+        });
+      }
     })
     .catch((err) => {
       console.log(err.message);
@@ -182,7 +166,6 @@ server.post("/signin", (req, res) => {
 });
 
 // sign-in with google-auth 👇
-
 server.post("/google-auth", async (req, res) => {
   let { accessToken } = req.body;
   getAuth()
@@ -193,7 +176,7 @@ server.post("/google-auth", async (req, res) => {
 
       let user = await User.findOne({ "personal_info.email": email })
         .select(
-          "personal_info.fullname personal_info.username personal_info.profile_img personal_info.google_auth"
+          "personal_info.fullname personal_info.username personal_info.profile_img google_auth"
         )
         .then((u) => {
           return u || null;
@@ -202,6 +185,7 @@ server.post("/google-auth", async (req, res) => {
 
       if (user) {
         // login
+        // console.log(user);
         if (!user.google_auth) {
           return res.status(403).json({
             error:
@@ -234,7 +218,7 @@ server.post("/google-auth", async (req, res) => {
     .catch((err) =>
       res.status(500).json({
         error:
-          "Failed to authenticate you with google. Try with some other google account.",
+          "❌ Failed to authenticate you with google. Try with some other google account.",
       })
     );
 });
@@ -379,18 +363,6 @@ server.post("/latest-blogs", (req, res) => {
     });
 });
 
-// all-latest-blogs-count 👇
-server.post("/all-latest-blogs-count", (req, res) => {
-  Blog.countDocuments({ draft: false })
-    .then((count) => {
-      return res.status(200).json({ totalDocs: count });
-    })
-    .catch((err) => {
-      console.log(err.message);
-      return res.status(500).json({ error: err.message });
-    });
-});
-
 // trending Blogs route 👇
 server.get("/trending-blogs", (req, res) => {
   Blog.find({ draft: false })
@@ -409,6 +381,18 @@ server.get("/trending-blogs", (req, res) => {
       return res.status(200).json({ blogs });
     })
     .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+// all-latest-blogs-count 👇
+server.post("/all-latest-blogs-count", (req, res) => {
+  Blog.countDocuments({ draft: false })
+    .then((count) => {
+      return res.status(200).json({ totalDocs: count });
+    })
+    .catch((err) => {
+      console.log(err.message);
       return res.status(500).json({ error: err.message });
     });
 });
@@ -484,7 +468,6 @@ server.post("/search-users", (req, res) => {
       return res.status(500).json({ error: err.message });
     });
 });
-
 // user profile route 👇
 server.post("/get-profile", (req, res) => {
   let { username } = req.body;
@@ -676,6 +659,7 @@ server.post("/add-comment", verifyJWT, (req, res) => {
 
   if (replying_to) {
     commentObj.parent = replying_to;
+    commentObj.isReply = true;
   }
 
   new Comment(commentObj).save().then(async (commentFile) => {
@@ -723,6 +707,8 @@ server.post("/add-comment", verifyJWT, (req, res) => {
       children,
     });
   });
+
+  //
 });
 
 // get  blog comments
@@ -749,158 +735,95 @@ server.post("/get-blog-comments", (req, res) => {
     });
 });
 
-// change password route
-server.post("/change-password", verifyJWT, (req, res) => {
-  let { currentPassword, newPassword } = req.body;
-  if (
-    !passwordRegex.test(currentPassword) ||
-    !passwordRegex.test(newPassword)
-  ) {
-    return res.status(403).json({
-      error:
-        "Password should be 6 to 20 characters long with a numeric, 1 lowercase and 1 uppercase letters",
-    });
-  }
+// get replies
+server.post("/get-replies", (req, res) => {
+  let { _id, skip } = req.body;
 
-  User.findOne({ _id: req.user })
-    .then((user) => {
-      if (user.google_auth) {
-        return res.status(403).json({
-          error:
-            "You can't change account's password because you logged in through google",
-        });
+  let maxLimit = 5;
+
+  Comment.findOne({ _id })
+    .populate({
+      path: "children",
+      option: {
+        limit: maxLimit,
+        skip: skip,
+        sort: { commentedAt: -1 },
+      },
+      populate: {
+        path: "commented_by",
+        select:
+          "personal_info.profile_img personal_info.fullname personal_info.username",
+      },
+      select: "-blog_id -updatedAt",
+    })
+    .select("children")
+    .then((doc) => res.status(200).json({ replies: doc.children }))
+    .catch((err) => res.status(500).json({ error: err.message }));
+});
+
+// delete comments
+const deleteComments = (_id) => {
+  console.log("hello");
+  Comment.findOneAndDelete({ _id })
+    .then((comment) => {
+      if (comment.parent) {
+        Comment.findOneAndUpdate(
+          { _id: comment.parent },
+          { $pull: { children: _id } }
+        )
+          .then((data) => console.log("comment delete from parent"))
+          .catch((err) => console.log(err));
       }
 
-      bcrypt.compare(
-        currentPassword,
-        user.personal_info.password,
-        (err, result) => {
-          if (err) {
-            return res.status(500).json({
-              error:
-                "Some error occured while changing the password, please try again later.",
-            });
-          }
-          if (!result) {
-            return res
-              .status(403)
-              .json({ error: "Incorrect current password" });
-          }
+      Notification.findOneAndDelete({ comment: _id }).then((notification) =>
+        console.log("comment notification deleted!")
+      );
 
-          bcrypt.hash(newPassword, 10, (err, hashed_password) => {
-            User.findOneAndUpdate(
-              { _id: req.user },
-              { "personal_info.password": hashed_password }
-            )
-              .then((u) => {
-                return res.status(200).json({ status: "password changed" });
-              })
-              .catch((err) => {
-                return res.status(500).json({
-                  error:
-                    "Some error occurred while saving new password, please try again later",
-                });
-              });
+      Notification.findOneAndDelete({ reply: _id }).then((notification) =>
+        console.log("reply notification deleted!")
+      );
+
+      Blog.findOneAndUpdate(
+        { _id: comment.blog_id },
+        {
+          $pull: { comments: _id },
+          $inc: { "activity.total_comments": -1 },
+          "activity.total_parent_comments": comment.parent ? 0 : -1,
+        }
+      ).then((blog) => {
+        if (comment.children.length) {
+          comment.children.map((replies) => {
+            deleteComments(replies);
           });
         }
-      );
+      });
     })
-    .catch((err) => {
-      console.log(err);
-      return res.status(500).json({ error: "User not Found!" });
-    });
-});
+    .catch((err) => console.log(err.message));
+};
 
-// notification route
-server.get("/new-notification", verifyJWT, (req, res) => {
+server.post("/delete-comment", verifyJWT, (req, res) => {
   let user_id = req.user;
-  Notification.exists({
-    notification_for: user_id,
-    seen: false,
-    user: { $ne: user_id },
-  })
-    .then((result) => {
-      if (result) {
-        return res.status(200).json({ new_notification_available: true });
+  let { _id } = req.body;
+
+  // Log relevant values for debugging
+
+  Comment.findOne({ _id })
+    .then((comment) => {
+      if (user_id == comment.commented_by || user_id == comment.blog_author) {
+        deleteComments(_id);
+        return res.status(200).json({ status: "done👍" });
       } else {
-        return res.status(200).json({ new_notification_available: false });
+        return res
+          .status(403)
+          .json({ error: "you can not delete this comment" });
       }
     })
-    .catch((err) => {
-      console.log(err.message);
-      return res.status(500).json({ error: err.message });
-    });
-});
-
-server.post("/notifications", verifyJWT, (req, res) => {
-  let user_id = req.user;
-  let { page, filter, deleteDocCount } = req.body;
-  let maxLimit = 10;
-  let findQuery = { notification_for: user_id, user: { $ne: user_id } };
-  let skipDocs = (page - 1) * maxLimit;
-
-  if (filter !== "all") {
-    findQuery.type = filter;
-  }
-
-  if (deleteDocCount) {
-    skipDocs -= deleteDocCount;
-  }
-
-  Notification.find(findQuery)
-    .skip(skipDocs)
-    .limit(maxLimit)
-    .populate("blog", "title blog_id")
-    .populate(
-      "user",
-      "personal_info.fullname personal_info.username personal_info.profile_img"
-    )
-    .populate("comment", "comment")
-    .populate("replied_on_comment", "comment")
-    .populate("reply", "comment")
-    .sort({ createdAt: -1 })
-    .select("createdAt type sen reply")
-    .then((notifications) => {
-      return res.status(200).json({ notifications });
-    })
-    .catch((err) => {
-      console.log(err.message);
-      return res.status(500).json({ error: err.message });
-    });
-});
-
-server.post("/all-notifications-count", verifyJWT, (req, res) => {
-  let user_id = req.user;
-
-  let { filter } = req.body;
-
-  let findQuery = {
-    notification_for: user_id,
-    user: {
-      $ne: user_id,
-    },
-  };
-
-  if (filter !== "all") {
-    findQuery.type = filter;
-  }
-
-  Notification.countDocuments(findQuery)
-    .then((count) => {
-      return res.status(200).json({ totalDocs: count });
-    })
-    .catch((err) => {
-      return res.status(500).json({ error: err.message });
-    });
+    .catch((err) => res.status(500).json({ error: err.message }));
 });
 
 //
-//....................................
-//  🖥️🖥️🖥️ listening on the port 👇 🖥️🖥️🖥️
-//....................................
-//
-//
-
-server.listen(PORT, () => {
-  console.log(`Listening on the port-> ${PORT}`);
+// 🖥️🖥️
+// starting the server (listening to the port)
+server.listen(process.env.PORT, () => {
+  console.log(`Listening the Server on Port: ${process.env.PORT}`);
 });

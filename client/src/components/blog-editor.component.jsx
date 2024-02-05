@@ -1,17 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import { Link, useNavigate, useParams } from "react-router-dom";
-import logo from "../assets/logo-2.png";
+import logo from "../assets/logo.png";
 import AnimationWrapper from "../common/page-animation";
 import defaultBanner from "../assets/blog banner.png";
 import loader from "../assets/loading.gif";
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { Toaster, toast } from "react-hot-toast";
-import { EditorContext } from "../pages/editor.page";
+
 import EditorJS from "@editorjs/editorjs";
-import { Tools } from "./tools";
+
 import { UserContext } from "../App";
+import { EditorContext } from "../pages/editor.pages";
+import { Tools } from "./tools.component";
 
 const BlogEditor = () => {
   let navigate = useNavigate();
@@ -180,7 +182,7 @@ const BlogEditor = () => {
     <>
       <nav className="navbar">
         {/* logo  */}
-        <Link to="/" className="flex-none w-10">
+        <Link to="/" className="flex-none w-32">
           <img src={logo} alt="hkDev" />
         </Link>
 
@@ -190,10 +192,10 @@ const BlogEditor = () => {
         </p>
 
         <div className="flex gap-4 ml-auto">
-          <button className="btn-dark py-2" onClick={handlePublishEvent}>
+          <button className="btn-dark py-1" onClick={handlePublishEvent}>
             Publish
           </button>
-          <button className="btn-light py-2" onClick={handleSaveDraft}>
+          <button className="btn-light py-1" onClick={handleSaveDraft}>
             Save Draft
           </button>
         </div>

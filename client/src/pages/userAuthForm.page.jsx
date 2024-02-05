@@ -1,16 +1,19 @@
 /* eslint-disable no-undef */
+/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
-import PropTypes from "prop-types";
-import Input from "../components/input";
-import googleIcon from "../assets/google.png";
-import { Link, Navigate } from "react-router-dom";
-import AnimationWrapper from "../common/page-animation";
+
 import { Toaster, toast } from "react-hot-toast";
 import axios from "axios";
-import { storeInSession } from "../common/Session";
+import { storeInSession } from "../common/session";
 import { useContext, useRef } from "react";
 import { UserContext } from "../App";
-import { authWithGoogle } from "../common/Firebase";
+// import { authWithGoogle } from "../common/Firebase";
+
+import { Link, Navigate } from "react-router-dom";
+import Input from "../components/input.component";
+import googleIcon from "../assets/google.png";
+import AnimationWrapper from "../common/page-animation";
+import { authWithGoogle } from "../common/firebase";
 
 const UserAuthForm = ({ type }) => {
   // const authForm = useRef();
@@ -18,19 +21,8 @@ const UserAuthForm = ({ type }) => {
   let { userAuth: { accessToken } = { accessToken: null }, setUserAuth } =
     useContext(UserContext);
 
-  // console.log(accessToken);
-
-  const userAuthThroughServer = (serverRoute, formData) => {
-    axios
-      .post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute, formData)
-      .then(({ data }) => {
-        storeInSession("user", JSON.stringify(data));
-        setUserAuth(data);
-      })
-      .catch(({ response }) => {
-        toast.error(response.data.error);
-      });
-  };
+  // console.log(accessToken); (for debugging purpose)
+  //........................................
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -41,15 +33,15 @@ const UserAuthForm = ({ type }) => {
     let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
 
     // formData
-
     let form = new FormData(authForm);
+
     let formData = {};
 
     for (const [key, value] of form.entries()) {
       formData[key] = value;
     }
 
-    // console.log(formData);
+    // console.log(formData); (for debugging purpose)
 
     // form validation.......
     let { fullname, email, password } = formData;
@@ -72,13 +64,33 @@ const UserAuthForm = ({ type }) => {
       );
     }
 
+    // sending data to backend
     userAuthThroughServer(serverRoute, formData);
   };
 
-  const handleGoogleAuth = (e) => {
+  //.......................................
+
+  const userAuthThroughServer = async (serverRoute, formData) => {
+    await axios
+      .post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute, formData)
+      .then(({ data }) => {
+        // (for debugging purpose)
+        // console.log(data);
+
+        storeInSession("user", JSON.stringify(data));
+        setUserAuth(data);
+      })
+      .catch(({ response }) => {
+        toast.error(response.data.error);
+      });
+  };
+
+  //.......................................
+
+  const handleGoogleAuth = async (e) => {
     e.preventDefault();
 
-    authWithGoogle()
+    await authWithGoogle()
       .then((user) => {
         // console.log(user);
 
@@ -98,11 +110,13 @@ const UserAuthForm = ({ type }) => {
     <Navigate to="/" />
   ) : (
     <AnimationWrapper keyValue={type}>
+      <Toaster />
       <section className="h-cover flex items-center justify-center">
-        <Toaster />
         <form id="authForm" className="w-[80%] max-w-[400px]">
-          <h1 className="text-3xl font-gelasio capitalize text-center mb-24">
-            {type === "sign-in" ? "Welcome Back!" : "Join hkDev"}
+          <h1 className="text-3xl font-gelasio text-center mb-20">
+            {type === "sign-in"
+              ? "Debugging Dreams: Welcome Back!"
+              : "Join hkDev"}
           </h1>
 
           {type !== "sign-in" ? (
@@ -112,9 +126,7 @@ const UserAuthForm = ({ type }) => {
               placeholder="Full-name"
               icon="fi-ss-user-pen"
             />
-          ) : (
-            ""
-          )}
+          ) : null}
 
           <Input
             name="email"
@@ -131,21 +143,21 @@ const UserAuthForm = ({ type }) => {
           />
 
           <button
-            className="btn-dark center mt-14"
+            className="btn-dark center mt-14 py-1.5"
             type="submit"
             onClick={handleSubmit}
           >
             {type.replace("-", " ")}
           </button>
 
-          <div className="relative w-full flex items-center gap-2 my-10 opacity-10 uppercase text-black font-bold">
+          <div className="relative w-full flex items-center gap-2 my-10 opacity-20 uppercase text-black font-bold">
             <hr className="w-1/2 border-black" />
             <p>or</p>
             <hr className="w-1/2 border-black" />
           </div>
 
           <button
-            className="btn-dark flex items-center justify-center gap-4 w-[90%] center"
+            className="btn-dark flex items-center justify-center gap-4 w-[90%] center py-2"
             onClick={handleGoogleAuth}
           >
             <img src={googleIcon} alt="google" className="w-5" /> Continue With
@@ -155,14 +167,20 @@ const UserAuthForm = ({ type }) => {
           {type === "sign-in" ? (
             <p className="mt-6 text-dark-grey text-xl text-center">
               Don&apos;t have an account ?
-              <Link to="/signup" className="underline text-black text-xl ml-1">
+              <Link
+                to="/signup"
+                className="underline text-purple text-xl ml-1 font-bold"
+              >
                 Join Us.
               </Link>
             </p>
           ) : (
             <p className="mt-6 text-dark-grey text-xl text-center">
               Already a member ?
-              <Link to="/signin" className="underline text-black text-xl ml-1">
+              <Link
+                to="/signin"
+                className="underline text-purple text-xl ml-1 font-bold"
+              >
                 Sign in here.
               </Link>
             </p>
@@ -171,10 +189,6 @@ const UserAuthForm = ({ type }) => {
       </section>
     </AnimationWrapper>
   );
-};
-
-UserAuthForm.propTypes = {
-  type: PropTypes.string.isRequired,
 };
 
 export default UserAuthForm;

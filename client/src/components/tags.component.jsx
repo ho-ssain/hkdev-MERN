@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useContext } from "react";
-import { EditorContext } from "../pages/editor.page";
+import { EditorContext } from "../pages/editor.pages";
 
 /* eslint-disable react/prop-types */
 const Tags = ({ tag, tagIndex }) => {
