@@ -1,8 +1,14 @@
+/* eslint-disable no-unused-vars */
 import { Link } from "react-router-dom";
 import page404 from "../assets/404.png";
 import logo from "../assets/logo.png";
+import logo_white from "../assets/logo_white.png";
+import { useContext } from "react";
+import { ThemeContext } from "../App";
 
 const PageNotFound = () => {
+  let { theme, setTheme } = useContext(ThemeContext);
+
   return (
     <section className="h-cover relative p-10 flex flex-col items-center gap-20 text-center">
       <img
@@ -22,7 +28,7 @@ const PageNotFound = () => {
 
       <div className="mt-auto">
         <img
-          src={logo}
+          src={theme === "light" ? logo : logo_white}
           alt="logo"
           className="h-8 object-contain block mx-auto select-none"
         />

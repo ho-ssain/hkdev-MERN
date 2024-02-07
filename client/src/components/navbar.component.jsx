@@ -1,9 +1,14 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
-import { useContext, useState } from "react";
-import { UserContext } from "../App";
+import logo_white from "../assets/logo_white.png";
+
+import { useContext, useEffect, useState } from "react";
+import { ThemeContext, UserContext } from "../App";
 import UserNavigationPanel from "./user-navigation.component";
+import axios from "axios";
+import { storeInSession } from "../common/session";
 
 const Navbar = () => {
   //..................................
@@ -13,10 +18,33 @@ const Navbar = () => {
 
   const {
     userAuth,
-    userAuth: { accessToken, profile_img, new_notification_available } = {},
+    userAuth: {
+      accessToken,
+      profile_img,
+      new_notification_available,
+      isAdmin,
+    } = {},
     setUserAuth,
   } = useContext(UserContext) || {};
 
+  let { theme, setTheme } = useContext(ThemeContext);
+
+  useEffect(() => {
+    if (accessToken) {
+      axios
+        .get(import.meta.env.VITE_SERVER_DOMAIN + "/new-notification", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .then(({ data }) => {
+          setUserAuth({ ...userAuth, ...data });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  }, [accessToken]);
   //...................................
   const handleSearch = (e) => {
     const query = e.target.value;
@@ -38,13 +66,21 @@ const Navbar = () => {
     }, 300);
   };
 
+  // change theme
+  const changeTheme = () => {
+    let newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    document.body.setAttribute("data-theme", newTheme);
+    storeInSession("theme", newTheme);
+  };
+
   return (
     <>
       <nav className="navbar z-50">
         {/* ------ logo ------ */}
         <Link to="/" className="flex-none w-32 relative inline-block">
           <img
-            src={logo}
+            src={theme === "light" ? logo : logo_white}
             alt="logo"
             className="w-full transition-transform transform-gpu hover:scale-110"
           />
@@ -74,59 +110,82 @@ const Navbar = () => {
               setSearchBoxVisibility((currentValue) => !currentValue)
             }
           >
-            <i className="fi fi-rr-search"></i>
+            <i className="fi fi-rr-search text-2xl mt-1"></i>
           </button>
 
           {/*----------Editor link ----------*/}
-          <Link to="/editor" className="hidden md:flex gap-2 link">
-            <i className="fi fi-ss-edit"></i>
-            <p>Write</p>
-          </Link>
-
-          {accessToken ? (
-            <>
-              <Link to="/dashboard/notifications">
-                <button className="w-10 h-10 rounded-full bg-grey relative hover:bg-black/10">
-                  <i className="fi fi-rr-bell text-2xl block mt-1"></i>
-                  {
-                    //....................
-                    new_notification_available ? (
-                      <span className="bg-red w-3 h-3 rounded-full absolute z-10 top-2 right-2"></span>
-                    ) : (
-                      ""
-                    )
-                  }
-                </button>
+          {
+            //-----------
+            isAdmin ? (
+              <Link to="/editor" className="hidden md:flex gap-2 link">
+                <i className="fi fi-ss-edit"></i>
+                <p>Write</p>
               </Link>
+            ) : (
+              ""
+            )
+          }
+          <button
+            className="w-10 h-10 rounded-full bg-grey relative hover:bg-black/10"
+            onClick={changeTheme}
+          >
+            <i
+              className={
+                "fi fi-rr-" +
+                (theme === "light"
+                  ? "moon-stars"
+                  : "sun" + " text-2xl block mt-1")
+              }
+            ></i>
+          </button>
 
-              <div
-                className="relative"
-                onClick={handleUserNavPanel}
-                onBlur={handleBlur}
-              >
-                <button className="w-10 h-10 mt-1">
-                  <img
-                    src={profile_img}
-                    alt="profile"
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                </button>
-                {userNavPanel ? <UserNavigationPanel /> : ""}
-              </div>
-            </>
-          ) : (
-            <>
-              {/*----------Login link ----------*/}
-              <Link to="/signin" className="btn-dark py-1">
-                Sign In
-              </Link>
+          {
+            //---------------
+            accessToken ? (
+              <>
+                <Link to="/dashboard/notifications">
+                  <button className="w-10 h-10 rounded-full bg-grey relative hover:bg-black/10">
+                    <i className="fi fi-rr-bell text-2xl block mt-1"></i>
+                    {
+                      //....................
+                      new_notification_available ? (
+                        <span className="bg-red w-3 h-3 rounded-full absolute z-10 top-2 right-2"></span>
+                      ) : (
+                        ""
+                      )
+                    }
+                  </button>
+                </Link>
 
-              {/*----------Sign-up link ----------*/}
-              <Link to="/signup" className="btn-light py-1 hidden md:block">
-                Sign Up
-              </Link>
-            </>
-          )}
+                <div
+                  className="relative"
+                  onClick={handleUserNavPanel}
+                  onBlur={handleBlur}
+                >
+                  <button className="w-10 h-10 mt-1">
+                    <img
+                      src={profile_img}
+                      alt="profile"
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  </button>
+                  {userNavPanel ? <UserNavigationPanel /> : ""}
+                </div>
+              </>
+            ) : (
+              <>
+                {/*----------Login link ----------*/}
+                <Link to="/signin" className="btn-dark py-1">
+                  Sign In
+                </Link>
+
+                {/*----------Sign-up link ----------*/}
+                <Link to="/signup" className="btn-light py-1 hidden md:block">
+                  Sign Up
+                </Link>
+              </>
+            )
+          }
         </div>
       </nav>
 

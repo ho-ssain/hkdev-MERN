@@ -5,14 +5,11 @@ import { Link } from "react-router-dom";
 import { getDay } from "../common/date";
 
 const MinimalBlogPost = ({ blog, index }) => {
-  let {
-    title,
-    blog_id: id,
-    author: {
-      personal_info: { fullname, profile_img, username },
-    },
-    publishedAt,
-  } = blog;
+  let { title, blog_id: id, author, publishedAt } = blog;
+
+  const fullname = author?.personal_info?.fullname || "Unknown";
+  const profile_img = author?.personal_info?.profile_img || ""; // Provide a default value for profile_img
+  const username = author?.personal_info?.username || ""; // Provide a default value for username
 
   return (
     <Link to={`/blog/${id}`} className="flex gap-5 mb-8">

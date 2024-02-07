@@ -9,6 +9,7 @@ import axios from "axios";
 import BlogEditor from "../components/blog-editor.component";
 import PublishForm from "../components/publish-form.component";
 import Loader from "../components/loader.component";
+import PageNotFound from "./404.page";
 
 const blogStructure = {
   title: "",
@@ -29,8 +30,7 @@ const Editor = () => {
   const [textEditor, setTextEditor] = useState({ isReady: false });
   const [loading, setLoading] = useState(true);
 
-  let { userAuth: { accessToken } = { accessToken: null } } =
-    useContext(UserContext);
+  let { userAuth: { accessToken, isAdmin } = {} } = useContext(UserContext);
 
   useEffect(() => {
     if (!blog_id) {
@@ -66,7 +66,9 @@ const Editor = () => {
     >
       {
         //...........
-        accessToken === "null" ? (
+        !isAdmin ? (
+          <Navigate to="/404" />
+        ) : accessToken === "null" ? (
           <Navigate to="/signin" />
         ) : loading ? (
           <Loader />

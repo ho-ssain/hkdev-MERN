@@ -2,6 +2,8 @@
 /* eslint-disable no-unused-vars */
 import { Link, useNavigate, useParams } from "react-router-dom";
 import logo from "../assets/logo.png";
+import logo_white from "../assets/logo_white.png";
+
 import AnimationWrapper from "../common/page-animation";
 import defaultBanner from "../assets/blog banner.png";
 import loader from "../assets/loading.gif";
@@ -11,11 +13,13 @@ import { Toaster, toast } from "react-hot-toast";
 
 import EditorJS from "@editorjs/editorjs";
 
-import { UserContext } from "../App";
+import { ThemeContext, UserContext } from "../App";
 import { EditorContext } from "../pages/editor.pages";
 import { Tools } from "./tools.component";
 
 const BlogEditor = () => {
+  let { theme, setTheme } = useContext(ThemeContext);
+
   let navigate = useNavigate();
   // const [file, setFile] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,7 +40,7 @@ const BlogEditor = () => {
   // useEffect
 
   useEffect(() => {
-    if (!textEditor.isReady) {
+    if (!textEditor?.isReady) {
       setTextEditor(
         new EditorJS({
           holder: "textEditor",
@@ -165,7 +169,7 @@ const BlogEditor = () => {
             toast.dismiss(loadingToast);
             toast.success("Saved 👍");
             setTimeout(() => {
-              navigate("/");
+              navigate("/dashboard/blogs?tab=draft");
             }, 500);
           })
           .catch(({ response }) => {
@@ -183,12 +187,12 @@ const BlogEditor = () => {
       <nav className="navbar">
         {/* logo  */}
         <Link to="/" className="flex-none w-32">
-          <img src={logo} alt="hkDev" />
+          <img src={theme === "light" ? logo : logo_white} alt="hkDev" />
         </Link>
 
         {/* A paragraph which shows the title of the blog  */}
         <p className="max-md:hidden text-black line-clamp-1 w-full">
-          {title.length ? title : "New Blog"}
+          {title?.length ? title : "New Blog"}
         </p>
 
         <div className="flex gap-4 ml-auto">
@@ -232,7 +236,7 @@ const BlogEditor = () => {
             <textarea
               defaultValue={title}
               placeholder="blog title"
-              className="text-3xl font-medium w-full h-20 outline-none resize-none mt-10 loading-tight placeholder:opacity-40"
+              className="text-3xl font-medium w-full h-20 outline-none resize-none mt-10 loading-tight placeholder:opacity-40 bg-white"
               onKeyDown={handleTitleKeyDown}
               onChange={handleTitleChange}
             ></textarea>

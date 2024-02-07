@@ -17,7 +17,6 @@ const InPageNavigation = ({
   let [inPageNavIndex, setInPageNavIndex] = useState(defaultActiveIndex);
 
   let [width, setWidth] = useState(window.innerWidth);
-
   let [isResizeEventAdded, setIsResizeEventAdded] = useState(false);
 
   activeTabLineRef = useRef();
@@ -68,7 +67,10 @@ const InPageNavigation = ({
           );
         })}
 
-        <hr ref={activeTabLineRef} className="absolute bottom-0 duration-300" />
+        <hr
+          ref={activeTabLineRef}
+          className="absolute bottom-0 duration-300 border-dark-grey"
+        />
       </div>
 
       {Array.isArray(children) ? children[inPageNavIndex] : children}

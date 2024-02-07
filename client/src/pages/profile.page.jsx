@@ -136,7 +136,7 @@ const Profile = () => {
                 profileId === username ? (
                   <Link
                     to="/settings/edit-profile"
-                    className="btn-light rounded-md"
+                    className="btn-light rounded-md py-2 underline hover:text-red/70"
                   >
                     Edit profile
                   </Link>

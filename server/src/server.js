@@ -23,7 +23,7 @@ import Comment from "./Schema/Comment.js";
 // creating express server
 const server = express();
 
-// middle wares
+//
 server.use(cors());
 server.use(express.json({ limit: "50mb" }));
 server.use(express.urlencoded({ limit: "50mb", extended: true }));
@@ -39,7 +39,7 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-// jwt verify
+// jwt verify (middle wares)
 const verifyJWT = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
@@ -51,6 +51,7 @@ const verifyJWT = (req, res, next) => {
       return res.status(403).json({ error: "Access token is invalid!" });
     }
     req.user = user.id;
+    req.admin = user.admin;
     next();
   });
 };
@@ -120,13 +121,17 @@ const generatedUsername = async (email) => {
 
 // sending the data to frontend in formatted way.
 const formatDataToSend = (user) => {
-  const accessToken = jwt.sign({ id: user._id }, process.env.SECRET_ACCESS_KEY);
+  const accessToken = jwt.sign(
+    { id: user._id, admin: user.admin },
+    process.env.SECRET_ACCESS_KEY
+  );
 
   return {
     accessToken,
     profile_img: user.personal_info.profile_img,
     username: user.personal_info.username,
     fullname: user.personal_info.fullname,
+    isAdmin: user.admin,
   };
 };
 
@@ -250,93 +255,101 @@ server.post("/bannerUpload", (req, res) => {
 // Publish Blog route 👇
 server.post("/create-blog", verifyJWT, (req, res) => {
   let authorId = req.user;
-  let { title, des, banner, tags, content, draft, id } = req.body;
-  if (!title.length) {
-    return res.status(403).json({
-      error: "you must provide a title",
-    });
-  }
+  let isAdmin = req.admin;
 
-  if (!draft) {
-    if (!des.length || des.length > 200) {
+  if (isAdmin) {
+    let { title, des, banner, tags, content, draft, id } = req.body;
+    if (!title.length) {
       return res.status(403).json({
-        error: "you must provide blog description under 200 characters",
+        error: "you must provide a title",
       });
     }
 
-    if (!banner.length) {
-      return res
-        .status(403)
-        .json({ error: "you must provide blog banner to publish it" });
+    if (!draft) {
+      if (!des.length || des.length > 200) {
+        return res.status(403).json({
+          error: "you must provide blog description under 200 characters",
+        });
+      }
+
+      if (!banner.length) {
+        return res
+          .status(403)
+          .json({ error: "you must provide blog banner to publish it" });
+      }
+
+      if (!content.blocks.length) {
+        return res
+          .status(403)
+          .json({ error: "There must be some blog content to publish it" });
+      }
+
+      if (!tags.length || tags.length > 10) {
+        return res.status(403).json({
+          error: "Provide tags in order to publish the blog, Maximum 10",
+        });
+      }
     }
 
-    if (!content.blocks.length) {
-      return res
-        .status(403)
-        .json({ error: "There must be some blog content to publish it" });
-    }
+    tags = tags.map((tag) => tag.toLowerCase());
+    let blog_id =
+      id ||
+      title
+        .replace(/[^a-zA-Z0-9]/g, " ")
+        .replace(/\s+/g, "-")
+        .trim() + nanoid();
 
-    if (!tags.length || tags.length > 10) {
-      return res.status(403).json({
-        error: "Provide tags in order to publish the blog, Maximum 10",
+    if (id) {
+      Blog.findOneAndUpdate(
+        { blog_id },
+        { title, des, banner, content, tags, draft: draft || false }
+      )
+        .then(() => {
+          return res.status(200).json({ id: blog_id });
+        })
+        .catch((err) => {
+          return res.status(500).json(err.message);
+        });
+    } else {
+      let blog = new Blog({
+        title,
+        des,
+        banner,
+        content,
+        tags,
+        author: authorId,
+        blog_id,
+        draft: Boolean(draft),
       });
+
+      blog
+        .save()
+        .then((blog) => {
+          let incrementVal = draft ? 0 : 1;
+          User.findOneAndUpdate(
+            { _id: authorId },
+            {
+              $inc: { "account_info.total_posts": incrementVal },
+              $push: { blogs: blog._id },
+            }
+          )
+            .then((user) => {
+              return res.status(200).json({ id: blog.blog_id });
+            })
+            .catch((err) => {
+              return res
+                .status(500)
+                .json({ error: "Failed to update total posts number" });
+            });
+        })
+        .catch((err) => {
+          return res.status(500).json({ error: err.message });
+        });
     }
-  }
-
-  tags = tags.map((tag) => tag.toLowerCase());
-  let blog_id =
-    id ||
-    title
-      .replace(/[^a-zA-Z0-9]/g, " ")
-      .replace(/\s+/g, "-")
-      .trim() + nanoid();
-
-  if (id) {
-    Blog.findOneAndUpdate(
-      { blog_id },
-      { title, des, banner, content, tags, draft: draft || false }
-    )
-      .then(() => {
-        return res.status(200).json({ id: blog_id });
-      })
-      .catch((err) => {
-        return res.status(500).json(err.message);
-      });
   } else {
-    let blog = new Blog({
-      title,
-      des,
-      banner,
-      content,
-      tags,
-      author: authorId,
-      blog_id,
-      draft: Boolean(draft),
-    });
-
-    blog
-      .save()
-      .then((blog) => {
-        let incrementVal = draft ? 0 : 1;
-        User.findOneAndUpdate(
-          { _id: authorId },
-          {
-            $inc: { "account_info.total_posts": incrementVal },
-            $push: { blogs: blog._id },
-          }
-        )
-          .then((user) => {
-            return res.status(200).json({ id: blog.blog_id });
-          })
-          .catch((err) => {
-            return res
-              .status(500)
-              .json({ error: "Failed to update total posts number" });
-          });
-      })
-      .catch((err) => {
-        return res.status(500).json({ error: err.message });
-      });
+    return res
+      .status(500)
+      .json({ error: "you don't have permissions to create any blog" });
   }
 });
 
@@ -642,7 +655,7 @@ server.post("/isliked-by-user", verifyJWT, (req, res) => {
 // add comment route
 server.post("/add-comment", verifyJWT, (req, res) => {
   let user_id = req.user;
-  let { _id, comment, replying_to, blog_author } = req.body;
+  let { _id, comment, replying_to, blog_author, notification_id } = req.body;
 
   if (!comment.length) {
     return res
@@ -693,6 +706,17 @@ server.post("/add-comment", verifyJWT, (req, res) => {
       ).then((replyingToCommentDoc) => {
         notificationObj.notification_for = replyingToCommentDoc.commented_by;
       });
+
+      if (notification_id) {
+        Notification.findOneAndUpdate(
+          {
+            _id: notification_id,
+          },
+          {
+            reply: commentFile._id,
+          }
+        ).then((notification) => console.log("notification updated!"));
+      }
     }
 
     new Notification(notificationObj)
@@ -744,7 +768,7 @@ server.post("/get-replies", (req, res) => {
   Comment.findOne({ _id })
     .populate({
       path: "children",
-      option: {
+      options: {
         limit: maxLimit,
         skip: skip,
         sort: { commentedAt: -1 },
@@ -779,9 +803,10 @@ const deleteComments = (_id) => {
         console.log("comment notification deleted!")
       );
 
-      Notification.findOneAndDelete({ reply: _id }).then((notification) =>
-        console.log("reply notification deleted!")
-      );
+      Notification.findOneAndUpdate(
+        { reply: _id },
+        { $unset: { reply: 1 } }
+      ).then((notification) => console.log("reply notification deleted!"));
 
       Blog.findOneAndUpdate(
         { _id: comment.blog_id },
@@ -819,6 +844,251 @@ server.post("/delete-comment", verifyJWT, (req, res) => {
       }
     })
     .catch((err) => res.status(500).json({ error: err.message }));
+});
+
+// user profile route 👇
+server.post("/get-profile", (req, res) => {
+  let { username } = req.body;
+  User.findOne({ "personal_info.username": username })
+    .select("-personal_info.password -google_auth -updatedAt -blogs")
+    .then((user) => {
+      return res.status(200).json(user);
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+// update profile image in db
+server.post("/update-profile-img", verifyJWT, (req, res) => {
+  let { url } = req.body;
+  User.findOneAndUpdate({ _id: req.user }, { "personal_info.profile_img": url })
+    .then((err) => {
+      return res.status(200).json({ profile_img: url });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+// update-profile
+server.post("/update-profile", verifyJWT, (req, res) => {
+  let { username, bio, social_links } = req.body;
+  let bioLimit = 150;
+  let socialLinksKeyArr = Object.keys(social_links);
+
+  if (username.length < 3) {
+    return res
+      .status(403)
+      .json({ error: "username should be at least 3 letters long" });
+  }
+
+  if (bio.length > bioLimit) {
+    return res
+      .status(403)
+      .json({ error: `bio should not be more than ${bioLimit}` });
+  }
+
+  try {
+    for (let i = 0; i < socialLinksKeyArr.length; i++) {
+      if (social_links[socialLinksKeyArr[i]].length) {
+        let hostname = new URL(social_links[socialLinksKeyArr[i]]).hostname;
+
+        if (
+          !hostname.includes(`${socialLinksKeyArr[i]}.com`) &&
+          socialLinksKeyArr[i] !== "website"
+        ) {
+          return res.status(403).json({
+            error: `${socialLinksKeyArr[i]} link is invalid. you must enter a valid full link`,
+          });
+        }
+      }
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "you must provide full social links with http(s) included.",
+    });
+  }
+
+  let updateObj = {
+    "personal_info.username": username,
+    "personal_info.bio": bio,
+    social_links,
+  };
+
+  User.findOneAndUpdate({ _id: req.user }, updateObj, { runValidators: true })
+    .then(() => {
+      return res.status(200).json({ username });
+    })
+    .catch((err) => {
+      if (err.code === 11000) {
+        return res.status(403).json({ error: "username is already taken" });
+      }
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+// notification route
+server.get("/new-notification", verifyJWT, (req, res) => {
+  let user_id = req.user;
+  Notification.exists({
+    notification_for: user_id,
+    seen: false,
+    user: { $ne: user_id },
+  })
+    .then((result) => {
+      if (result) {
+        return res.status(200).json({ new_notification_available: true });
+      } else {
+        return res.status(200).json({ new_notification_available: false });
+      }
+    })
+    .catch((err) => {
+      console.log(err.message);
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+server.post("/notifications", verifyJWT, (req, res) => {
+  let user_id = req.user;
+  let { page, filter, deleteDocCount } = req.body;
+  let maxLimit = 10;
+  let findQuery = { notification_for: user_id, user: { $ne: user_id } };
+  let skipDocs = (page - 1) * maxLimit;
+
+  if (filter !== "all") {
+    findQuery.type = filter;
+  }
+
+  if (deleteDocCount) {
+    skipDocs -= deleteDocCount;
+  }
+
+  Notification.find(findQuery)
+    .skip(skipDocs)
+    .limit(maxLimit)
+    .populate("blog", "title blog_id")
+    .populate(
+      "user",
+      "personal_info.fullname personal_info.username personal_info.profile_img"
+    )
+    .populate("comment", "comment")
+    .populate("replied_on_comment", "comment")
+    .populate("reply", "comment")
+    .sort({ createdAt: -1 })
+    .select("createdAt type sen reply")
+    .then((notifications) => {
+      Notification.updateMany(findQuery, { seen: true })
+        .skip(skipDocs)
+        .limit(maxLimit)
+        .then(() => console.log("notification seen"));
+
+      return res.status(200).json({ notifications });
+    })
+    .catch((err) => {
+      console.log(err.message);
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+server.post("/all-notifications-count", verifyJWT, (req, res) => {
+  let user_id = req.user;
+
+  let { filter } = req.body;
+
+  let findQuery = {
+    notification_for: user_id,
+    user: {
+      $ne: user_id,
+    },
+  };
+
+  if (filter !== "all") {
+    findQuery.type = filter;
+  }
+
+  Notification.countDocuments(findQuery)
+    .then((count) => {
+      return res.status(200).json({ totalDocs: count });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+server.post("/user-written-blogs", verifyJWT, (req, res) => {
+  let user_id = req.user;
+  let { page, draft, query, deletedDocCount } = req.body;
+
+  let maxLimit = 5;
+  let skipDocs = (page - 1) * maxLimit;
+  if (deletedDocCount) {
+    skipDocs -= deletedDocCount;
+  }
+  Blog.find({ author: user_id, draft, title: new RegExp(query, "i") })
+    .skip(skipDocs)
+    .limit(maxLimit)
+    .sort({ publishedAt: -1 })
+    .select("title banner publishedAt blog_id activity des draft -_id")
+    .then((blogs) => {
+      return res.status(200).json({ blogs });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+server.post("/user-written-blogs-count", verifyJWT, (req, res) => {
+  let user_id = req.user;
+  let { draft, query } = req.body;
+  Blog.countDocuments({
+    author: user_id,
+    draft,
+    title: new RegExp(query, "i"),
+  })
+    .then((count) => {
+      return res.status(200).json({ totalDocs: count });
+    })
+    .catch((err) => {
+      console.log(err.message);
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+server.post("/delete-blog", verifyJWT, (req, res) => {
+  const user_id = req.user;
+  const isAdmin = req.admin;
+  const { blog_id } = req.body;
+
+  if (isAdmin) {
+    Blog.findOneAndDelete({ blog_id })
+      .then((blog) => {
+        Notification.deleteMany({ blog: blog._id }).then((data) =>
+          console.log("notification deleted")
+        );
+
+        Comment.deleteMany({ blog_id: blog._id }).then((data) =>
+          console.log("comment deleted")
+        );
+
+        User.findOneAndUpdate(
+          { _id: user_id },
+          {
+            $pull: { blog: blog._id },
+            $inc: { "account_info.total_posts": -1 },
+          }
+        ).then((user) => console.log("blog deleted"));
+
+        return res.status(200).json({ status: "done" });
+      })
+      .catch((err) => {
+        return res.status(500).json({ error: err.message });
+      });
+  } else {
+    return res
+      .status(500)
+      .json({ error: "you don't have permissions to delete any blog" });
+  }
 });
 
 //
