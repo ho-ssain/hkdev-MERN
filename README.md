@@ -48,56 +48,35 @@ Frontend: React
 Backend: Node.js, Express
 Database: MongoDB
 Authentication: JWT token
+Animation: Framer motion
 
 ## Challenges Faced
 
-Like and Comment System: Implementing a robust like and comment system presented challenges in terms of database structure and real-time updates.
-Notification System: Designing and implementing an efficient notification system required careful consideration of database schemas and event handling.
-Responsive Design: Ensuring a consistent and user-friendly experience across various devices posed challenges in terms of CSS and layout adjustments.
+- Like and Comment System: Implementing a robust like and comment system presented challenges in terms of database structure and real-time updates.
+- Notification System: Designing and implementing an efficient notification system required careful consideration of database schemas and event handling.
+- Responsive Design: Ensuring a consistent and user-friendly experience across various devices posed challenges in terms of CSS and layout adjustments.
 
 ## Future Features
 
-Improved Server-Side Code Style: Enhance the readability and maintainability of server-side code by refactoring and adhering to best practices.
-User Following System: Implement a user-following system to enable users to follow their favorite bloggers and receive updates on their activity.
-Contributing
-Provide guidelines for contributors, including how to report issues and submit pull requests.
+- Improved Server-Side Code Style: Enhance the readability and maintainability of server-side code by refactoring and adhering to best practices.
+- User Following System: Implement a user-following system to enable users to follow their favorite bloggers and receive updates on their activity.
 
 ## Contributing
 
 Contributions to hkDev are welcomed and encouraged! To contribute to this project, please follow these guidelines:
 
-Fork the repository and create your branch from main.
-Ensure your code adheres to the project's coding standards and conventions.
-Test your changes thoroughly, including both positive and negative scenarios.
-Make sure your commits are descriptive and include relevant details.
-Submit a pull request, clearly explaining the changes you've made and their purpose.
+- Fork the repository and create your branch from main.
+- Ensure your code adheres to the project's coding standards and conventions.
+- Test your changes thoroughly, including both positive and negative scenarios.
+- Make sure your commits are descriptive and include relevant details.
+- Submit a pull request, clearly explaining the changes you've made and their purpose.
+
 Thank you for helping to improve hkDev!
 
 ## License
 
 hkDev is licensed under the MIT License.
 
-```code
-MIT License
+[MIT License](LICENSE)
 
-Copyright (c) [2023] [hkDev(ho-ssain)]
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-```
+Copyright (c) 2023 hkDev(ho-ssain)
