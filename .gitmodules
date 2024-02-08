@@ -1,0 +1,6 @@
+[submodule "hkDev_client"]
+	path = hkDev_client
+	url = https://github.com/ho-ssain/hkDev_client.git
+[submodule "hkDev_server"]
+	path = hkDev_server
+	url = https://github.com/ho-ssain/hkDev_server.git
