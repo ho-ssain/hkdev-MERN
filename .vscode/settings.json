@@ -1,0 +1,34 @@
+{
+  "cSpell.words": [
+    "adminsdk",
+    "appspot",
+    "blogcard",
+    "cloudinary",
+    "Dprss",
+    "editorjs",
+    "fileupload",
+    "firebaseapp",
+    "flaticon",
+    "fullname",
+    "gelasio",
+    "hkdev",
+    "Hossain",
+    "inpage",
+    "IPIZU",
+    "isliked",
+    "Kabir",
+    "Kiki",
+    "maxlength",
+    "newcomments",
+    "nobanner",
+    "notionists",
+    "sidenavbar",
+    "signin",
+    "tailwindcss",
+    "uicons",
+    "usercard"
+  ],
+  "files.associations": {
+    "*.css": "tailwindcss"
+  }
+}
