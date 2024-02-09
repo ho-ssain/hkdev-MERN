@@ -1,14 +1,15 @@
 # hkDev - Modern Blog Web App
 
 hkDev is a feature-rich modern blog web application designed to provide users with a seamless blogging experience. It includes a variety of functionalities such as a modern blog editor, Google authentication, dynamic blog pages, search capabilities, user profiles, analytics, and more.
+(inspired by Medium )
 
 Table of Contents
 
 - [hkDev - Modern Blog Web App](#hkdev---modern-blog-web-app)
   - [Features](#features)
   - [Demo](#demo)
-  - [Installation](#installation)
   - [Usage](#usage)
+  - [Installation](#installation)
   - [Technologies Used](#technologies-used)
   - [Challenges Faced](#challenges-faced)
   - [Future Features](#future-features)
@@ -32,23 +33,29 @@ Table of Contents
 
 ## Demo
 
-Provide a link or GIF demonstrating the functionality and user interface of hkDev.
-
-## Installation
-
-Provide instructions on how to install hkDev locally or deploy it on a server.
+_Visit the site_
+Live Link-: [https://hkdev-client.onrender.com](https://hkdev-client.onrender.com/)
 
 ## Usage
 
-Guide users on how to use hkDev effectively, including key features and functionalities.
+_Here is a video for demonstrate the hkDev site key features and functionalities_
+video-: [https://youtu.be/U-SFkJLQEL8](https://youtu.be/U-SFkJLQEL8)
+
+## Installation
+
+- Clone the repo
+- npm install (both client and server) (for installing the packages)
+- to start for client in local system (npm run dev)
+- to start the server (npm start)
+- to automatically change and restart use nodemon (npm dev:server)
 
 ## Technologies Used
 
-Frontend: React
-Backend: Node.js, Express
-Database: MongoDB
-Authentication: JWT token
-Animation: Framer motion
+_Frontend_: React
+_Backend_: Node.js, Express
+_Database_: MongoDB
+_Authentication_: JWT token
+_Animation_: Framer motion
 
 ## Challenges Faced
 
