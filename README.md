@@ -1,3 +1,5 @@
+<base target="_blank">
+
 # hkDev - Modern Blog Web App
 
 hkDev is a feature-rich modern blog web application designed to provide users with a seamless blogging experience. It includes a variety of functionalities such as a modern blog editor, Google authentication, dynamic blog pages, search capabilities, user profiles, analytics, and more.
